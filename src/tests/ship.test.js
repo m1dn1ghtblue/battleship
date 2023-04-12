@@ -36,6 +36,10 @@ describe('Ship factory function', () => {
 		}).toThrow();
 
 		expect(() => {
+			new Ship([1, 2]);
+		}).toThrow();
+
+		expect(() => {
 			new Ship('string');
 		}).toThrow();
 	});
