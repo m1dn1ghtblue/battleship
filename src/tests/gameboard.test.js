@@ -1,4 +1,5 @@
 import Gameboard from '../scripts/game/gameboard.js';
+import Ship from '../scripts/game/ship.js';
 
 describe('Gameboard factory function', () => {
 	test('Function should return object with required properties', () => {
@@ -63,11 +64,14 @@ describe('Gameboard factory function', () => {
 	test('Gameboard should receive attacks and hit ship if it is at attack coordinates', () => {
 		const gameboard = new Gameboard();
 		gameboard.placeShip([3, 3], 1, 'horizontal');
+		const hitMethod = jest.spyOn(gameboard.getCell([3, 3]).ship, 'hit');
+
 		gameboard.receiveAttack([2, 2]);
 		gameboard.receiveAttack([3, 3]);
 
 		expect(gameboard.getCell([2, 2]).isHit).toBe(true);
 		expect(gameboard.getCell([3, 3]).isHit).toBe(true);
+		expect(hitMethod).toHaveBeenCalled();
 	});
 
 	test('Gameboard should not receive attacks on the same cell multiple times', () => {

@@ -74,7 +74,8 @@ export default function Gameboard() {
 			for (let i = 1; i < size; ++i) {
 				cells.push([coords[0], coords[1] + i]);
 			}
-		} else {
+		}
+		if (orientation === 'vertical') {
 			for (let i = 1; i < size; ++i) {
 				cells.push([coords[0] + i, coords[1]]);
 			}
@@ -99,7 +100,8 @@ export default function Gameboard() {
 
 	function _validateCoordinates(coords) {
 		if (
-			!coords instanceof Array ||
+			!coords ||
+			!(coords instanceof Array) ||
 			coords.length != 2 ||
 			!Number.isInteger(coords[0]) ||
 			!Number.isInteger(coords[1])
