@@ -16,4 +16,11 @@ describe('Player factory function', () => {
 		expect(Alice.name).toEqual('Alice');
 		expect(Bob.name).toEqual('Bob');
 	});
+
+	test('Player should handle invalid name argument', () => {
+		expect(() => new Player(12)).toThrow();
+		expect(() => new Player(['name'])).toThrow();
+		expect(() => new Player()).toThrow();
+		expect(() => new Player(null)).toThrow();
+	});
 });
