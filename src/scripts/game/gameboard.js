@@ -3,10 +3,59 @@ import Ship from './ship.js';
 const MAX_COORDINATE = 9;
 
 export default function Gameboard() {
-	const grid = makeGrid();
+	const grid = _makeGrid();
 	let shipsAlive = 0;
 
-	function makeGrid() {
+	function placeShip(coords, size, orientation) {
+		_validateCoordinates(coords);
+		_validateOrientation(orientation);
+
+		const cells = _getShipCells(coords, size, orientation);
+		_validateShipCells(cells);
+
+		const ship = new Ship(size);
+
+		for (let [row, col] of cells) {
+			grid[row][col].ship = ship;
+		}
+
+		shipsAlive++;
+	}
+
+	function getCell(coords) {
+		_validateCoordinates(coords);
+
+		return {
+			get ship() {
+				return grid[coords[0]][coords[1]].ship;
+			},
+
+			get isHit() {
+				return grid[coords[0]][coords[1]].isHit;
+			},
+		};
+	}
+
+	function receiveAttack(coords) {
+		_validateCoordinates(coords);
+		let [row, col] = coords;
+
+		if (grid[row][col].isHit) {
+			throw Error(`Coordinates ${coords} have already been attacked`);
+		}
+
+		grid[row][col].isHit = true;
+
+		if (grid[row][col].ship) {
+			const ship = grid[row][col].ship;
+			ship.hit();
+			if (!ship.isAlive) {
+				shipsAlive--;
+			}
+		}
+	}
+
+	function _makeGrid() {
 		const grid = [];
 		for (let i = 0; i <= MAX_COORDINATE; ++i) {
 			grid.push([]);
@@ -18,7 +67,7 @@ export default function Gameboard() {
 		return grid;
 	}
 
-	function getShipCells(coords, size, orientation) {
+	function _getShipCells(coords, size, orientation) {
 		const cells = [coords];
 
 		if (orientation === 'horizontal') {
@@ -40,7 +89,7 @@ export default function Gameboard() {
 		return cells;
 	}
 
-	function validateOrientation(orientation) {
+	function _validateOrientation(orientation) {
 		if (orientation != 'horizontal' && orientation != 'vertical') {
 			throw Error(
 				`Invalid ship orientation: ${orientation}. Orientation must be string 'horizontal' or 'vertical'`
@@ -48,7 +97,7 @@ export default function Gameboard() {
 		}
 	}
 
-	function validateCoordinates(coords) {
+	function _validateCoordinates(coords) {
 		if (
 			!coords instanceof Array ||
 			coords.length != 2 ||
@@ -65,15 +114,15 @@ export default function Gameboard() {
 		}
 	}
 
-	function validateShipCells(cells) {
+	function _validateShipCells(cells) {
 		for (let coords of cells) {
-			if (!checkSurrounding(coords)) {
+			if (!_checkSurrounding(coords)) {
 				throw Error(`Cannot place ship cell at coordinates ${coords}`);
 			}
 		}
 	}
 
-	function checkSurrounding(coords) {
+	function _checkSurrounding(coords) {
 		const [row, col] = coords;
 		for (let i = row - 1; i <= row + 1; ++i) {
 			for (let j = col - 1; j <= col + 1; ++j) {
@@ -90,53 +139,8 @@ export default function Gameboard() {
 			return shipsAlive == 0;
 		},
 
-		placeShip(coords, size, orientation) {
-			validateCoordinates(coords);
-			validateOrientation(orientation);
-
-			const cells = getShipCells(coords, size, orientation);
-			validateShipCells(cells);
-
-			const ship = new Ship(size);
-
-			for (let [row, col] of cells) {
-				grid[row][col].ship = ship;
-			}
-
-			shipsAlive++;
-		},
-
-		getCell(coords) {
-			validateCoordinates(coords);
-
-			return {
-				get ship() {
-					return grid[coords[0]][coords[1]].ship;
-				},
-
-				get isHit() {
-					return grid[coords[0]][coords[1]].isHit;
-				},
-			};
-		},
-
-		receiveAttack(coords) {
-			validateCoordinates(coords);
-			let [row, col] = coords;
-
-			if (grid[row][col].isHit) {
-				throw Error(`Coordinates ${coords} have already been attacked`);
-			}
-
-			grid[row][col].isHit = true;
-
-			if (grid[row][col].ship) {
-				const ship = grid[row][col].ship;
-				ship.hit();
-				if (!ship.isAlive) {
-					shipsAlive--;
-				}
-			}
-		},
+		placeShip,
+		getCell,
+		receiveAttack,
 	};
 }
