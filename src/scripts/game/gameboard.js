@@ -52,7 +52,10 @@ export default function Gameboard() {
 			if (!ship.isAlive) {
 				shipsAlive--;
 			}
+			return true;
 		}
+
+		return false;
 	}
 
 	function _makeGrid() {

@@ -74,6 +74,14 @@ describe('Gameboard factory function', () => {
 		expect(hitMethod).toHaveBeenCalled();
 	});
 
+	test('Gameboard receive attack method should return false in case of miss and true in case of ship hit', () => {
+		const gameboard = new Gameboard();
+		gameboard.placeShip([5, 5], 1, 'horizontal');
+
+		expect(gameboard.receiveAttack([4, 4])).toBe(false);
+		expect(gameboard.receiveAttack([5, 5])).toBe(true);
+	});
+
 	test('Gameboard should not receive attacks on the same cell multiple times', () => {
 		const gameboard = new Gameboard();
 		gameboard.receiveAttack([5, 5]);
