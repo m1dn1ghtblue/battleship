@@ -6,19 +6,9 @@ describe('Game factory function', () => {
 		const game = new Game(new Player('Alice'), new Player('Bob'));
 
 		expect(game).toHaveProperty('isGameOver');
-		expect(game).toHaveProperty('activePlayer');
-		expect(game).toHaveProperty('playerOne');
-		expect(game).toHaveProperty('playerTwo');
-		expect(game).toHaveProperty('takeTurn');
-	});
-
-	test('Game object should provide acess to player objects set at initialization', () => {
-		const player1 = new Player('Alice');
-		const player2 = new Player('Bob');
-		const game = new Game(player1, player2);
-
-		expect(game.playerOne).toBe(player1);
-		expect(game.playerTwo).toBe(player2);
+		expect(game).toHaveProperty('isPlayerOneTurn');
+		expect(game).toHaveProperty('takePlayerOneTurn');
+		expect(game).toHaveProperty('takePlayerTwoTurn');
 	});
 
 	test('Game object should switch activePlayer after each turn', () => {
@@ -28,15 +18,29 @@ describe('Game factory function', () => {
 		player2.gameboard.placeShip([0, 0], 1, 'horizontal');
 		const game = new Game(player1, player2);
 
-		expect(game.activePlayer).toBe(player1);
+		expect(game.isPlayerOneTurn).toBe(true);
 
-		game.takeTurn([5, 5]);
+		game.takePlayerOneTurn([5, 5]);
 
-		expect(game.activePlayer).toBe(player2);
+		expect(game.isPlayerOneTurn).toBe(false);
 
-		game.takeTurn([4, 4]);
+		game.takePlayerTwoTurn([4, 4]);
 
-		expect(game.activePlayer).toBe(player1);
+		expect(game.isPlayerOneTurn).toBe(true);
+	});
+
+	test('Game object should throw on takePlayerOneTurn when isPlayerOneTurn is false and vice versa', () => {
+		const player1 = new Player('Alice');
+		const player2 = new Player('Bob');
+		player1.gameboard.placeShip([0, 0], 1, 'horizontal');
+		player2.gameboard.placeShip([0, 0], 1, 'horizontal');
+		const game = new Game(player1, player2);
+
+		expect(() => game.takePlayerTwoTurn([2, 2])).toThrow();
+
+		game.takePlayerOneTurn([2, 2]);
+
+		expect(() => game.takePlayerOneTurn([3, 3])).toThrow;
 	});
 
 	test('Game object should report when game is over', () => {
@@ -48,11 +52,11 @@ describe('Game factory function', () => {
 
 		expect(game.isGameOver).toBe(false);
 
-		game.takeTurn([0, 1]);
+		game.takePlayerOneTurn([0, 1]);
 
 		expect(game.isGameOver).toBe(false);
 
-		game.takeTurn([0, 0]);
+		game.takePlayerTwoTurn([0, 0]);
 
 		expect(game.isGameOver).toBe(true);
 	});
@@ -64,27 +68,27 @@ describe('Game factory function', () => {
 		player2.gameboard.placeShip([0, 0], 3, 'horizontal');
 		const game = new Game(player1, player2);
 
-		expect(game.activePlayer).toBe(player1);
+		expect(game.isPlayerOneTurn).toBe(true);
 
-		game.takeTurn([0, 0]);
+		game.takePlayerOneTurn([0, 0]);
 
-		expect(game.activePlayer).toBe(player1);
+		expect(game.isPlayerOneTurn).toBe(true);
 
-		game.takeTurn([1, 0]);
+		game.takePlayerOneTurn([1, 0]);
 
-		expect(game.activePlayer).toBe(player2);
+		expect(game.isPlayerOneTurn).toBe(false);
 
-		game.takeTurn([0, 0]);
+		game.takePlayerTwoTurn([0, 0]);
 
-		expect(game.activePlayer).toBe(player2);
+		expect(game.isPlayerOneTurn).toBe(false);
 
-		game.takeTurn([0, 1]);
+		game.takePlayerTwoTurn([0, 1]);
 
-		expect(game.activePlayer).toBe(player2);
+		expect(game.isPlayerOneTurn).toBe(false);
 
-		game.takeTurn([0, 2]);
+		game.takePlayerTwoTurn([0, 2]);
 
-		expect(game.activePlayer).toBe(player2);
+		expect(game.isPlayerOneTurn).toBe(false);
 	});
 
 	test('Game object should not switch active player after turn that has thrown an error', () => {
@@ -94,22 +98,22 @@ describe('Game factory function', () => {
 		player2.gameboard.placeShip([0, 0], 1, 'horizontal');
 		const game = new Game(player1, player2);
 
-		expect(game.activePlayer).toBe(player1);
+		expect(game.isPlayerOneTurn).toBe(true);
 
-		game.takeTurn([-1, 0]);
+		game.takePlayerOneTurn([-1, 0]);
 
-		expect(game.activePlayer).toBe(player1);
+		expect(game.isPlayerOneTurn).toBe(true);
 
-		game.takeTurn([5, 5]);
+		game.takePlayerOneTurn([5, 5]);
 
-		expect(game.activePlayer).toBe(player2);
+		expect(game.isPlayerOneTurn).toBe(false);
 
-		game.takeTurn([2, 2]);
+		game.takePlayerTwoTurn([2, 2]);
 
-		expect(game.activePlayer).toBe(player1);
+		expect(game.isPlayerOneTurn).toBe(true);
 
-		game.takeTurn([5, 5]);
+		game.takePlayerOneTurn([5, 5]);
 
-		expect(game.activePlayer).toBe(player1);
+		expect(game.isPlayerOneTurn).toBe(true);
 	});
 });
