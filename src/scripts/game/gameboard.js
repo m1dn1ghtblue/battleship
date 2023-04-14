@@ -50,12 +50,33 @@ export default function Gameboard() {
 			const ship = grid[row][col].ship;
 			ship.hit();
 			if (!ship.isAlive) {
-				shipsAlive--;
+				_killShip(ship);
 			}
 			return true;
 		}
 
 		return false;
+	}
+
+	function _killShip(ship) {
+		shipsAlive--;
+		for (let i = 0; i <= MAX_COORDINATE; ++i) {
+			for (let j = 0; j <= MAX_COORDINATE; ++j) {
+				if (grid[i][j].ship === ship) {
+					_hitSurrounding(i, j);
+				}
+			}
+		}
+	}
+
+	function _hitSurrounding(row, col) {
+		for (let i = row - 1; i <= row + 1; ++i) {
+			for (let j = col - 1; j <= col + 1; ++j) {
+				if (i >= 0 && i <= MAX_COORDINATE && j >= 0 && j <= MAX_COORDINATE) {
+					grid[i][j].isHit = true;
+				}
+			}
+		}
 	}
 
 	function _makeGrid() {

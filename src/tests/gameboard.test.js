@@ -108,4 +108,29 @@ describe('Gameboard factory function', () => {
 
 		expect(gameboard.isGameOver).toBe(true);
 	});
+
+	test('Gameboard should mark surrounding cells as hit after ship was destroyed', () => {
+		const gameboard = new Gameboard();
+		gameboard.placeShip([3, 3], 3, 'horizontal'); // [3, 3] [3, 4] [3, 5]
+
+		gameboard.receiveAttack([3, 3]);
+		gameboard.receiveAttack([3, 4]);
+		gameboard.receiveAttack([3, 5]);
+
+		expect(gameboard.getCell([2, 2]).isHit).toBe(true);
+		expect(gameboard.getCell([3, 2]).isHit).toBe(true);
+		expect(gameboard.getCell([4, 2]).isHit).toBe(true);
+
+		expect(gameboard.getCell([2, 6]).isHit).toBe(true);
+		expect(gameboard.getCell([3, 6]).isHit).toBe(true);
+		expect(gameboard.getCell([4, 6]).isHit).toBe(true);
+
+		expect(gameboard.getCell([2, 3]).isHit).toBe(true);
+		expect(gameboard.getCell([2, 4]).isHit).toBe(true);
+		expect(gameboard.getCell([2, 5]).isHit).toBe(true);
+
+		expect(gameboard.getCell([4, 3]).isHit).toBe(true);
+		expect(gameboard.getCell([4, 4]).isHit).toBe(true);
+		expect(gameboard.getCell([4, 5]).isHit).toBe(true);
+	});
 });
