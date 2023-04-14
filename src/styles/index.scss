@@ -43,14 +43,13 @@ main {
 		align-items: center;
 
 		.player-name {
+			padding-left: 42px;
 			font-size: 1.6rem;
 		}
 
 		.gameboard-container {
 			width: calc(42px * 11);
 			height: calc(42px * 11);
-
-			border: 1px dotted red;
 		}
 	}
 }
