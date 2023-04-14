@@ -1,4 +1,56 @@
+@import './colors';
+
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Chivo+Mono:wght@400;700&display=swap');
+
 * {
 	margin: 0;
 	padding: 0;
+	box-sizing: border-box;
+}
+
+html, button, input {
+	font-family: 'Chivo Mono', monospace;
+	color: $color-black;
+}
+
+body {
+	background-color: $color-white;
+}
+
+main {
+	margin: 0 auto;
+	margin-top: 32px;
+	width: max-content;
+	display: grid;
+	grid-template-rows: max-content max-content;
+	grid-template-columns: 1fr 1fr;
+	grid-template-areas: 'title title'
+						 'player1 player2';
+	gap: 32px 128px;
+	justify-items: center;
+	
+	.title {
+		grid-area: title;
+		font-size: 5rem;
+		font-family: 'Black Ops One', cursive;
+		text-transform: uppercase;
+	}
+
+	.player-side {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		align-items: center;
+
+		.player-name {
+			font-size: 1.6rem;
+		}
+
+		.gameboard-container {
+			width: calc(42px * 11);
+			height: calc(42px * 11);
+
+			border: 1px dotted red;
+		}
+	}
 }
