@@ -1,67 +1,83 @@
 'use strict';
 
-import '../styles/gameboard.scss';
+import '../styles/gameUI.scss';
 
-export default function GameUI(game) {
-	const _gameState = game;
+export default function GameUI(game, gameContainer) {
+	const gameState = game;
 
-	const _playerOneGrid = makeGameboardGrid(_gameState.playerOne.gameboard, _takePlayerTwoTurn);
-	const _playerTwoGrid = makeGameboardGrid(_gameState.playerTwo.gameboard, _takePlayerOneTurn);
+	const gameDisplay = document.createElement('div');
+	gameDisplay.classList.add('game');
+	gameContainer.appendChild(gameDisplay);
 
-	const _playerOneGameboard = makeGameboard(_playerOneGrid);
-	const _playerTwoGameboard = makeGameboard(_playerTwoGrid);
+	const playerOneSide = document.createElement('div');
+	playerOneSide.classList.add('player-side');
+	gameDisplay.appendChild(playerOneSide);
+	const playerTwoSide = document.createElement('div');
+	playerTwoSide.classList.add('player-side');
+	gameDisplay.appendChild(playerTwoSide);
 
-	function _takePlayerOneTurn(row, col) {
-		if (_gameState.activePlayer === _gameState.playerOne) {
+	const playerOneName = document.createElement('h3');
+	playerOneName.classList.add('player-name');
+	playerOneName.textContent = gameState.playerOne.name;
+	playerOneSide.appendChild(playerOneName);
+
+	const playerTwoName = document.createElement('h3');
+	playerTwoName.classList.add('player-name');
+	playerTwoName.textContent = gameState.playerTwo.name;
+	playerTwoSide.appendChild(playerTwoName);
+
+	const playerOneGameboardContainer = document.createElement('div');
+	playerOneGameboardContainer.classList.add('gameboard-container');
+	playerOneSide.appendChild(playerOneGameboardContainer);
+
+	const playerTwoGameboardContainer = document.createElement('div');
+	playerTwoGameboardContainer.classList.add('gameboard-container');
+	playerTwoSide.appendChild(playerTwoGameboardContainer);
+
+	const playerOneGrid = makeGameboardGrid(gameState.playerOne.gameboard, takePlayerTwoTurn);
+	const playerTwoGrid = makeGameboardGrid(gameState.playerTwo.gameboard, takePlayerOneTurn);
+
+	const playerOneGameboard = makeGameboard(playerOneGrid);
+	const playerTwoGameboard = makeGameboard(playerTwoGrid);
+
+	playerOneGameboardContainer.appendChild(playerOneGameboard);
+	playerTwoGameboardContainer.appendChild(playerTwoGameboard);
+
+	updateActivePlayer();
+
+	function takePlayerOneTurn(row, col) {
+		if (gameState.activePlayer === gameState.playerOne) {
 			try {
-				_gameState.takeTurn([row, col]);
-				_updateGrid(_playerTwoGrid, _gameState.playerTwo.gameboard);
+				gameState.takeTurn([row, col]);
+				updateGrid(playerTwoGrid, gameState.playerTwo.gameboard);
+				updateActivePlayer();
 			} catch (error) {
 				console.error(error);
 			}
 		}
 	}
 
-	function _takePlayerTwoTurn(row, col) {
-		if (_gameState.activePlayer === _gameState.playerTwo) {
+	function takePlayerTwoTurn(row, col) {
+		if (gameState.activePlayer === gameState.playerTwo) {
 			try {
-				_gameState.takeTurn([row, col]);
-				_updateGrid(_playerOneGrid, _gameState.playerOne.gameboard);
+				gameState.takeTurn([row, col]);
+				updateGrid(playerOneGrid, gameState.playerOne.gameboard);
+				updateActivePlayer();
 			} catch (error) {
 				console.error(error);
 			}
 		}
 	}
 
-	function _updateGrid(grid, gameboard) {
-		const cells = grid.childNodes;
-		for (let row = 0; row < 10; ++row) {
-			for (let col = 0; col < 10; ++col) {
-				const cell = cells[row * 10 + col];
-				if (gameboard.getCell([row, col]).isHit) {
-					cell.classList.add('hit');
-				}
-			}
+	function updateActivePlayer() {
+		if (gameState.activePlayer === gameState.playerOne) {
+			playerOneGrid.classList.remove('active');
+			playerTwoGrid.classList.add('active');
+		} else {
+			playerOneGrid.classList.add('active');
+			playerTwoGrid.classList.remove('active');
 		}
 	}
-
-	return {
-		get playerOneGameboard() {
-			return _playerOneGameboard;
-		},
-
-		get playerTwoGameboard() {
-			return _playerTwoGameboard;
-		},
-
-		get playerOneName() {
-			return _gameState.playerOne.name;
-		},
-
-		get playerTwoName() {
-			return _gameState.playerTwo.name;
-		},
-	};
 }
 
 function makeGameboard(grid) {
@@ -89,6 +105,18 @@ function makeGameboard(grid) {
 	gameboard.appendChild(grid);
 
 	return gameboard;
+}
+
+function updateGrid(grid, gameboard) {
+	const cells = grid.childNodes;
+	for (let row = 0; row < 10; ++row) {
+		for (let col = 0; col < 10; ++col) {
+			const cell = cells[row * 10 + col];
+			if (gameboard.getCell([row, col]).isHit) {
+				cell.classList.add('hit');
+			}
+		}
+	}
 }
 
 function makeGameboardGrid(playerGameboard, onclickCallback) {
