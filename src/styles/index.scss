@@ -17,7 +17,7 @@ body {
 
 main {
 	margin: 0 auto;
-	margin-top: 64px;
+	margin-top: 32px;
 	width: max-content;
 	display: flex;
 	flex-direction: column;
@@ -36,16 +36,14 @@ main {
 	#setup-container {
 		display: none;
 		&.active {
-			display: flex;
+			display: block;
 		}
-
-		justify-content: center;
 	}
 
 	#game-container {
 		display: none;
 		&.active {
-			display: flex;
+			display: block;
 		}		
 	}
 }

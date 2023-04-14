@@ -50,7 +50,7 @@ export default function GameUI(game, gameContainer) {
 			try {
 				gameState.takeTurn([row, col]);
 				updateGrid(playerTwoGrid, gameState.playerTwo.gameboard);
-				updateActivePlayer();
+				endTurn();
 			} catch (error) {
 				console.error(error);
 			}
@@ -62,10 +62,18 @@ export default function GameUI(game, gameContainer) {
 			try {
 				gameState.takeTurn([row, col]);
 				updateGrid(playerOneGrid, gameState.playerOne.gameboard);
-				updateActivePlayer();
+				endTurn();
 			} catch (error) {
 				console.error(error);
 			}
+		}
+	}
+
+	function endTurn() {
+		if (gameState.isGameOver) {
+			gameOver();
+		} else {
+			updateActivePlayer();
 		}
 	}
 
@@ -77,6 +85,25 @@ export default function GameUI(game, gameContainer) {
 			playerOneGrid.classList.add('active');
 			playerTwoGrid.classList.remove('active');
 		}
+	}
+
+	function gameOver() {
+		playerOneGrid.classList.remove('active');
+		playerTwoGrid.classList.remove('active');
+
+		const winnerLabel = document.createElement('h2');
+		winnerLabel.classList.add('winner-label');
+		winnerLabel.textContent = `${gameState.activePlayer.name} wins!`;
+		gameDisplay.appendChild(winnerLabel);
+
+		const newGameButton = document.createElement('button');
+		newGameButton.classList.add('new-game-btn');
+		newGameButton.textContent = 'New game';
+		gameDisplay.appendChild(newGameButton);
+
+		newGameButton.addEventListener('click', () => {
+			location.reload();
+		});
 	}
 }
 

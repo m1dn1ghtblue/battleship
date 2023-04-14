@@ -4,6 +4,10 @@ export default function Game(player1, player2) {
 	let _playerOneTurn = true;
 
 	function takeTurn(coords) {
+		if (this.isGameOver) {
+			throw Error('Cannot take turn after game is over');
+		}
+
 		let switchPlayers;
 
 		try {

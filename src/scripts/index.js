@@ -8,6 +8,7 @@ const setupContainer = document.getElementById('setup-container');
 const gameContainer = document.getElementById('game-container');
 
 setupContainer.classList.add('active');
+
 setupGame(setupContainer).then((game) => {
 	setupContainer.classList.remove('active');
 	gameContainer.classList.add('active');

@@ -3,6 +3,17 @@ import '../styles/setup.scss';
 import Game from './game/game';
 import Player from './game/player';
 
+export default async function setupGame(setupContainer) {
+	const playerOne = await setupPlayerOne(setupContainer);
+	const playerTwo = await setupPlayerTwo(setupContainer);
+
+	randomPlacement(playerOne);
+	randomPlacement(playerTwo);
+
+	const game = new Game(playerOne, playerTwo);
+	return game;
+}
+
 const setupPlayerOne = (setupContainer) =>
 	new Promise((resolve) => {
 		const defaultName = 'Player 1';
@@ -69,10 +80,21 @@ function makeButton(text, callback) {
 	return button;
 }
 
-export default async function setupGame(setupContainer) {
-	const playerOne = await setupPlayerOne(setupContainer);
-	const playerTwo = await setupPlayerTwo(setupContainer);
+function randomPlacement(player) {
+	const shipSizes = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
-	const game = new Game(playerOne, playerTwo);
-	return game;
+	while (shipSizes.length > 0) {
+		try {
+			player.gameboard.placeShip(
+				[getRandomInt(10), getRandomInt(10)],
+				shipSizes[0],
+				getRandomInt(2) ? 'horizontal' : 'vertical'
+			);
+			shipSizes.shift();
+		} catch (e) {}
+	}
+}
+
+function getRandomInt(max) {
+	return Math.floor(Math.random() * max);
 }
