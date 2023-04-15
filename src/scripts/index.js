@@ -11,10 +11,10 @@ gameLoop();
 
 function gameLoop() {
 	setupContainer.classList.add('active');
-	setupGame(setupContainer, (game) => {
+	setupGame(setupContainer, (game, isAI) => {
 		setupContainer.classList.remove('active');
 		gameContainer.classList.add('active');
-		playGame(game, gameContainer, () => {
+		playGame(game, isAI, gameContainer, () => {
 			gameContainer.classList.remove('active');
 			gameLoop();
 		});

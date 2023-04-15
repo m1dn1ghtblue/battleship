@@ -34,7 +34,7 @@ export default function setup(setupContainer, onSetupCallback) {
 			randomPlacement(playerTwo);
 			display.remove();
 
-			startGame();
+			startGame(true);
 		});
 		display.appendChild(playWithAIBtn);
 	}
@@ -52,15 +52,15 @@ export default function setup(setupContainer, onSetupCallback) {
 
 			display.remove();
 
-			startGame();
+			startGame(false);
 		});
 
 		display.appendChild(playBtn);
 	}
 
-	function startGame() {
+	function startGame(isAI) {
 		const game = new Game(playerOne, playerTwo);
-		onSetupCallback(game);
+		onSetupCallback(game, isAI);
 	}
 }
 

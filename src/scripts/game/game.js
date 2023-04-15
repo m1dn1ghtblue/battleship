@@ -22,6 +22,14 @@ export default function Game(player1, player2) {
 		}
 	}
 
+	function takeAITurn() {
+		function getRandomInt(max) {
+			return Math.floor(Math.random() * max);
+		}
+
+		this.takeTurn([getRandomInt(10), getRandomInt(10)]);
+	}
+
 	return {
 		get playerOne() {
 			return _playerOne;
@@ -40,5 +48,6 @@ export default function Game(player1, player2) {
 		},
 
 		takeTurn,
+		takeAITurn,
 	};
 }

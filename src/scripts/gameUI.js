@@ -2,7 +2,7 @@
 
 import '../styles/gameUI.scss';
 
-export default function playGame(game, gameContainer, onGameOverCalback) {
+export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 	const gameState = game;
 
 	const gameDisplay = document.createElement('div');
@@ -34,7 +34,7 @@ export default function playGame(game, gameContainer, onGameOverCalback) {
 	playerTwoGameboardContainer.classList.add('gameboard-container');
 	playerTwoSide.appendChild(playerTwoGameboardContainer);
 
-	const playerOneGrid = makeGameboardGrid(gameState.playerOne.gameboard, takePlayerTwoTurn);
+	const playerOneGrid = makeGameboardGrid(gameState.playerOne.gameboard, isAI ? () => {} : takePlayerTwoTurn);
 	const playerTwoGrid = makeGameboardGrid(gameState.playerTwo.gameboard, takePlayerOneTurn);
 
 	const playerOneGameboard = makeGameboard(playerOneGrid);
@@ -69,6 +69,12 @@ export default function playGame(game, gameContainer, onGameOverCalback) {
 		}
 	}
 
+	function takeAITurn() {
+		gameState.takeAITurn();
+		updateGrid(playerOneGrid, gameState.playerOne.gameboard);
+		endTurn();
+	}
+
 	function endTurn() {
 		if (gameState.isGameOver) {
 			gameOver();
@@ -84,6 +90,9 @@ export default function playGame(game, gameContainer, onGameOverCalback) {
 		} else {
 			playerOneGrid.classList.add('active');
 			playerTwoGrid.classList.remove('active');
+			if (isAI) {
+				takeAITurn();
+			}
 		}
 	}
 
