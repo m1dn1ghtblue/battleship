@@ -1,4 +1,5 @@
 import '../styles/setup.scss';
+import '../styles/gameboardUI.scss';
 
 import Game from './game/game';
 import Player from './game/player';
