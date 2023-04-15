@@ -2,16 +2,21 @@
 
 import '../styles/index.scss';
 import setupGame from './setup.js';
-import GameUI from './gameUI';
+import playGame from './gameUI';
 
 const setupContainer = document.getElementById('setup-container');
 const gameContainer = document.getElementById('game-container');
 
-setupContainer.classList.add('active');
+gameLoop();
 
-setupGame(setupContainer).then((game) => {
-	setupContainer.classList.remove('active');
-	gameContainer.classList.add('active');
-
-	GameUI(game, gameContainer);
-});
+function gameLoop() {
+	setupContainer.classList.add('active');
+	setupGame(setupContainer, (game) => {
+		setupContainer.classList.remove('active');
+		gameContainer.classList.add('active');
+		playGame(game, gameContainer, () => {
+			gameContainer.classList.remove('active');
+			gameLoop();
+		});
+	});
+}

@@ -2,7 +2,7 @@
 
 import '../styles/gameUI.scss';
 
-export default function GameUI(game, gameContainer) {
+export default function playGame(game, gameContainer, onGameOverCalback) {
 	const gameState = game;
 
 	const gameDisplay = document.createElement('div');
@@ -102,7 +102,8 @@ export default function GameUI(game, gameContainer) {
 		gameDisplay.appendChild(newGameButton);
 
 		newGameButton.addEventListener('click', () => {
-			location.reload();
+			gameDisplay.remove();
+			onGameOverCalback();
 		});
 	}
 }

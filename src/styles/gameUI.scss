@@ -60,7 +60,11 @@ $cell-size: 48px;
 					.gameboard-grid-cell {
 						border: 1px solid $color-dark;
 						transition: background-color 0.2s ease-in;
-		
+						
+						&.ship {
+							background-color: gray	;
+						}
+
 						&.hit {
 							background-color: $color-main;
 							

@@ -3,53 +3,66 @@ import '../styles/setup.scss';
 import Game from './game/game';
 import Player from './game/player';
 
-export default async function setupGame(setupContainer) {
-	const playerOne = await setupPlayerOne(setupContainer);
-	const playerTwo = await setupPlayerTwo(setupContainer);
+export default function setup(setupContainer, onSetupCallback) {
+	let playerOne = null,
+		playerTwo = null;
 
-	randomPlacement(playerOne);
-	randomPlacement(playerTwo);
+	setupPlayerOne();
 
-	const game = new Game(playerOne, playerTwo);
-	return game;
-}
-
-const setupPlayerOne = (setupContainer) =>
-	new Promise((resolve) => {
+	function setupPlayerOne() {
 		const defaultName = 'Player 1';
-
 		const display = makeDisplay(setupContainer);
-
 		const nameInput = makeInput(defaultName);
 		display.appendChild(makeLabel(nameInput));
 
-		display.appendChild(
-			makeButton('Next player', () => {
-				const name = nameInput.value.length > 0 ? nameInput.value : defaultName;
-				const player = new Player(name);
-				display.remove();
-				resolve(player);
-			})
-		);
-	});
+		const nextPlayerBtn = makeButton('Next player', () => {
+			const name = nameInput.value.length > 0 ? nameInput.value : defaultName;
+			playerOne = new Player(name);
+			randomPlacement(playerOne);
 
-const setupPlayerTwo = (setupContainer) =>
-	new Promise((resolve) => {
+			display.remove();
+			setupPlayerTwo();
+		});
+		display.appendChild(nextPlayerBtn);
+
+		const playWithAIBtn = makeButton('Play with AI', () => {
+			const name = nameInput.value.length > 0 ? nameInput.value : defaultName;
+			playerOne = new Player(name);
+			randomPlacement(playerOne);
+
+			playerTwo = new Player('AI');
+			randomPlacement(playerTwo);
+			display.remove();
+
+			startGame();
+		});
+		display.appendChild(playWithAIBtn);
+	}
+
+	function setupPlayerTwo() {
 		const defaultName = 'Player 2';
 		const display = makeDisplay(setupContainer);
-
 		const nameInput = makeInput(defaultName);
 		display.appendChild(makeLabel(nameInput));
 
-		display.appendChild(
-			makeButton('Play', () => {
-				const name = nameInput.value.length > 0 ? nameInput.value : defaultName;
-				const player = new Player(name);
-				display.remove();
-				resolve(player);
-			})
-		);
-	});
+		const playBtn = makeButton('Play', () => {
+			const name = nameInput.value.length > 0 ? nameInput.value : defaultName;
+			playerTwo = new Player(name);
+			randomPlacement(playerTwo);
+
+			display.remove();
+
+			startGame();
+		});
+
+		display.appendChild(playBtn);
+	}
+
+	function startGame() {
+		const game = new Game(playerOne, playerTwo);
+		onSetupCallback(game);
+	}
+}
 
 function makeDisplay(setupContainer) {
 	const setupDisplay = document.createElement('div');
@@ -83,6 +96,10 @@ function makeButton(text, callback) {
 function randomPlacement(player) {
 	const shipSizes = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
+	function getRandomInt(max) {
+		return Math.floor(Math.random() * max);
+	}
+
 	while (shipSizes.length > 0) {
 		try {
 			player.gameboard.placeShip(
@@ -93,8 +110,4 @@ function randomPlacement(player) {
 			shipSizes.shift();
 		} catch (e) {}
 	}
-}
-
-function getRandomInt(max) {
-	return Math.floor(Math.random() * max);
 }
