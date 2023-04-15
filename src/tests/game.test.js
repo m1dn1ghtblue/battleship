@@ -10,6 +10,7 @@ describe('Game factory function', () => {
 		expect(game).toHaveProperty('playerOne');
 		expect(game).toHaveProperty('playerTwo');
 		expect(game).toHaveProperty('takeTurn');
+		expect(game).toHaveProperty('takeAITurn');
 	});
 
 	test('Game object should provide acess to player objects set at initialization', () => {

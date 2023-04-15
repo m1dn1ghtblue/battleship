@@ -69,8 +69,13 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 		}
 	}
 
-	function takeAITurn() {
-		gameState.takeAITurn();
+	async function takeAITurn() {
+		await new Promise((resolve) =>
+			setTimeout(() => {
+				gameState.takeAITurn();
+				resolve();
+			}, 400)
+		);
 		updateGrid(playerOneGrid, gameState.playerOne.gameboard);
 		endTurn();
 	}

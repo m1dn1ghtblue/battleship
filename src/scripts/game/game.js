@@ -23,11 +23,8 @@ export default function Game(player1, player2) {
 	}
 
 	function takeAITurn() {
-		function getRandomInt(max) {
-			return Math.floor(Math.random() * max);
-		}
-
-		this.takeTurn([getRandomInt(10), getRandomInt(10)]);
+		const opponentGameBoard = _playerOneTurn ? _playerTwo.gameboard : _playerOne.gameboard;
+		this.takeTurn(AITurnCoords(opponentGameBoard));
 	}
 
 	return {
@@ -50,4 +47,143 @@ export default function Game(player1, player2) {
 		takeTurn,
 		takeAITurn,
 	};
+}
+
+function AITurnCoords(gameboard) {
+	console.log('AI chooses coordinates');
+
+	let damagedCell = getDamagedCell(gameboard);
+	let isVertical = damagedCell ? isShipVertical(gameboard, damagedCell) : null;
+
+	console.log('damaged cell:', damagedCell ? damagedCell : 'null');
+	console.log('isVertical:', isVertical ? isVertical : 'null');
+	console.log();
+
+	if (damagedCell == null) {
+		return getRandomUndamagedCell(gameboard);
+	}
+
+	return getCellAround(gameboard, damagedCell, isVertical);
+}
+
+function getRandomUndamagedCell(gameboard) {
+	const cells = [];
+	for (let row = 0; row < 10; ++row) {
+		for (let col = 0; col < 10; ++col) {
+			if (!gameboard.getCell([row, col]).isHit) {
+				cells.push([row, col]);
+			}
+		}
+	}
+
+	return cells[getRandomInt(cells.length)];
+}
+
+function getCellAround(gameboard, cell, isVertical) {
+	const cells = [];
+	const [row, col] = cell;
+
+	if (isVertical === null) {
+		if (row > 0 && !gameboard.getCell([row - 1, col]).isHit) {
+			cells.push([row - 1, col]);
+		}
+		if (row < 9 && !gameboard.getCell([row + 1, col]).isHit) {
+			cells.push([row + 1, col]);
+		}
+
+		if (col > 0 && !gameboard.getCell([row, col - 1]).isHit) {
+			cells.push([row, col - 1]);
+		}
+		if (col < 9 && !gameboard.getCell([row, col + 1]).isHit) {
+			cells.push([row, col + 1]);
+		}
+	}
+	if (isVertical === true) {
+		for (let up = row - 1; up >= 0; --up) {
+			if (gameboard.getCell([up, col]).isHit) {
+				if (gameboard.getCell([up, col]).ship == null) {
+					break;
+				}
+			} else {
+				cells.push([up, col]);
+				break;
+			}
+		}
+		for (let down = row + 1; down < 10; ++down) {
+			if (gameboard.getCell([down, col]).isHit) {
+				if (gameboard.getCell([down, col]).ship == null) {
+					break;
+				}
+			} else {
+				cells.push([down, col]);
+				break;
+			}
+		}
+	}
+	if (isVertical === false) {
+		for (let left = col - 1; left >= 0; --left) {
+			if (gameboard.getCell([row, left]).isHit) {
+				if (gameboard.getCell([row, left]).ship == null) {
+					break;
+				}
+			} else {
+				cells.push([row, left]);
+				break;
+			}
+		}
+		for (let right = col + 1; right < 10; ++right) {
+			if (gameboard.getCell([row, right]).isHit) {
+				if (gameboard.getCell([row, right]).ship == null) {
+					break;
+				}
+			} else {
+				cells.push([row, right]);
+				break;
+			}
+		}
+	}
+
+	console.log(`cells around [${row}, ${col}]`);
+	console.dir(cells);
+	return cells[getRandomInt(cells.length)];
+}
+
+function getDamagedCell(gameboard) {
+	for (let row = 0; row < 10; ++row) {
+		for (let col = 0; col < 10; ++col) {
+			if (
+				gameboard.getCell([row, col]).isHit &&
+				gameboard.getCell([row, col]).ship != null &&
+				gameboard.getCell([row, col]).ship.isAlive
+			) {
+				return [row, col];
+			}
+		}
+	}
+
+	return null;
+}
+
+function isShipVertical(gameboard, damagedCell) {
+	const [row, col] = damagedCell;
+
+	if (row > 0 && gameboard.getCell([row - 1, col]).isHit && gameboard.getCell([row - 1, col]).ship != null) {
+		return true;
+	}
+	if (row < 9 && gameboard.getCell([row + 1, col]).isHit && gameboard.getCell([row + 1, col]).ship != null) {
+		return true;
+	}
+
+	if (col > 0 && gameboard.getCell([row, col - 1]).isHit && gameboard.getCell([row, col - 1]).ship != null) {
+		return false;
+	}
+	if (col < 9 && gameboard.getCell([row, col + 1]).isHit && gameboard.getCell([row, col + 1]).ship != null) {
+		return false;
+	}
+
+	return null;
+}
+
+function getRandomInt(max) {
+	return Math.floor(Math.random() * max);
 }
