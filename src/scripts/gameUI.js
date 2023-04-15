@@ -43,6 +43,9 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 	playerOneGameboardContainer.appendChild(playerOneGameboard);
 	playerTwoGameboardContainer.appendChild(playerTwoGameboard);
 
+	if (isAI) {
+		revealGrid(playerOneGrid);
+	}
 	updateActivePlayer();
 
 	function takePlayerOneTurn(row, col) {
@@ -105,6 +108,9 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 		playerOneGrid.classList.remove('active');
 		playerTwoGrid.classList.remove('active');
 
+		revealGrid(playerOneGrid);
+		revealGrid(playerTwoGrid);
+
 		const winnerLabel = document.createElement('h2');
 		winnerLabel.classList.add('winner-label');
 		winnerLabel.textContent = `${gameState.activePlayer.name} wins!`;
@@ -120,6 +126,10 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 			onGameOverCalback();
 		});
 	}
+}
+
+function revealGrid(grid) {
+	grid.classList.add('revealed');
 }
 
 function makeGameboard(grid) {
@@ -153,9 +163,16 @@ function updateGrid(grid, gameboard) {
 	const cells = grid.childNodes;
 	for (let row = 0; row < 10; ++row) {
 		for (let col = 0; col < 10; ++col) {
-			const cell = cells[row * 10 + col];
-			if (gameboard.getCell([row, col]).isHit) {
-				cell.classList.add('hit');
+			const UIcell = cells[row * 10 + col];
+			const gameCell = gameboard.getCell([row, col]);
+			if (gameCell.isHit) {
+				UIcell.classList.add('hit');
+				if (gameCell.ship != null) {
+					UIcell.classList.add('damaged');
+					if (!gameCell.ship.isAlive) {
+						UIcell.classList.add('destroyed');
+					}
+				}
 			}
 		}
 	}

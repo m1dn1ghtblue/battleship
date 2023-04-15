@@ -15,12 +15,12 @@ $cell-size: 48px;
 
 		.player-name {
 			color: $color-dark;
-			padding-left: $cell-size;
 			font-size: 1.8rem;
 			font-weight: 700;
 		}
 
 		.gameboard-container {
+			margin-right: $cell-size;
 			width: calc($cell-size * 11);
 			height: calc($cell-size * 11);
 
@@ -57,21 +57,31 @@ $cell-size: 48px;
 					outline: 4px solid transparent; 
 					transition: outline-color 0.3s ease-in-out;
 					
+					&.revealed {
+						.gameboard-grid-cell.ship {
+							z-index: 1;
+							border: 3px dashed $color-dark;
+							outline: 2px solid $color-dark;
+						}
+					}
+
 					.gameboard-grid-cell {
 						border: 1px solid $color-dark;
 						transition: background-color 0.2s ease-in;
-						
-						&.ship {
-							background-color: gray	;
-						}
 
 						&.hit {
 							background-color: $color-main;
-							
-							&.ship {
+							&.damaged {
 								background-color: $color-accent;
-							}
-						}		
+								&.destroyed {
+									z-index: 1;
+									background-color: $color-dark;
+									outline: 3px dashed $color-dark;
+								}
+							}	
+						}	
+						
+						
 					}
 		
 					&.active {
@@ -79,8 +89,9 @@ $cell-size: 48px;
 						
 						.gameboard-grid-cell {
 							&:hover:not(.hit) {
-								border: 2px solid $color-dark;
-								outline: 2px solid $color-dark;
+								z-index: 1;
+								border: 3px solid $color-dark;
+								outline: 3px solid $color-dark;
 								cursor: pointer;
 							}
 						}
@@ -103,12 +114,14 @@ $cell-size: 48px;
 		font-size: 2rem;
 		margin-bottom: 32px;
 
+		width: 256px;
+		height: 64px;
+
 		border: none;
 		border-radius: 12px;
 		background-color: $color-main;
 		color: $color-black;
 		transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
-		padding: 16px 32px;
 
 		&:hover {
 			cursor: pointer;
