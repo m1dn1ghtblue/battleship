@@ -56,13 +56,7 @@
 
 	.gameboard .gameboard-grid {
 
-		&.revealed {
-			.gameboard-grid-cell.ship {
-				z-index: 1;
-				border: 3px dashed $color-dark;
-				outline: 2px solid $color-dark;
-			}
-		}
+		
 
 		&.active {
 			outline-color: $color-main;
@@ -78,6 +72,13 @@
 		}
 
 		.gameboard-grid-cell {
+			&.revealed {
+					z-index: 1;
+					border: 3px dashed $color-dark;
+					outline: 2px solid $color-dark;
+			}
+		
+
 			&.hit {
 				background-color: $color-main;
 				&.damaged {

@@ -50,14 +50,8 @@ export default function Game(player1, player2) {
 }
 
 function AITurnCoords(gameboard) {
-	console.log('AI chooses coordinates');
-
 	let damagedCell = getDamagedCell(gameboard);
 	let isVertical = damagedCell ? isShipVertical(gameboard, damagedCell) : null;
-
-	console.log('damaged cell:', damagedCell ? damagedCell : 'null');
-	console.log('isVertical:', isVertical ? isVertical : 'null');
-	console.log();
 
 	if (damagedCell == null) {
 		return getRandomUndamagedCell(gameboard);
@@ -143,8 +137,6 @@ function getCellAround(gameboard, cell, isVertical) {
 		}
 	}
 
-	console.log(`cells around [${row}, ${col}]`);
-	console.dir(cells);
 	return cells[getRandomInt(cells.length)];
 }
 

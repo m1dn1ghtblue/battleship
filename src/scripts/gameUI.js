@@ -4,39 +4,27 @@ import '../styles/gameUI.scss';
 import { makeGameboard, makeGameboardGrid } from './gameboardUI.js';
 
 export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
-	const gameState = game;
-
 	const gameDisplay = document.createElement('div');
 	gameDisplay.classList.add('game');
 	gameContainer.appendChild(gameDisplay);
 
-	const playerOneSide = document.createElement('div');
-	playerOneSide.classList.add('player-side');
+	const playerOneSide = makePlayerSide();
 	gameDisplay.appendChild(playerOneSide);
-	const playerTwoSide = document.createElement('div');
-	playerTwoSide.classList.add('player-side');
+
+	const playerTwoSide = makePlayerSide();
 	gameDisplay.appendChild(playerTwoSide);
 
-	const playerOneName = document.createElement('h3');
-	playerOneName.classList.add('player-name');
-	playerOneName.textContent = gameState.playerOne.name;
-	playerOneSide.appendChild(playerOneName);
+	playerOneSide.appendChild(makeNameLabel(game.playerOne.name));
+	playerTwoSide.appendChild(makeNameLabel(game.playerTwo.name));
 
-	const playerTwoName = document.createElement('h3');
-	playerTwoName.classList.add('player-name');
-	playerTwoName.textContent = gameState.playerTwo.name;
-	playerTwoSide.appendChild(playerTwoName);
-
-	const playerOneGameboardContainer = document.createElement('div');
-	playerOneGameboardContainer.classList.add('gameboard-container');
+	const playerOneGameboardContainer = makeGameboardContainer();
 	playerOneSide.appendChild(playerOneGameboardContainer);
 
-	const playerTwoGameboardContainer = document.createElement('div');
-	playerTwoGameboardContainer.classList.add('gameboard-container');
+	const playerTwoGameboardContainer = makeGameboardContainer();
 	playerTwoSide.appendChild(playerTwoGameboardContainer);
 
-	const playerOneGrid = makeGameboardGrid(gameState.playerOne.gameboard, isAI ? () => {} : takePlayerTwoTurn);
-	const playerTwoGrid = makeGameboardGrid(gameState.playerTwo.gameboard, takePlayerOneTurn);
+	const playerOneGrid = makeGameboardGrid();
+	const playerTwoGrid = makeGameboardGrid();
 
 	const playerOneGameboard = makeGameboard(playerOneGrid);
 	const playerTwoGameboard = makeGameboard(playerTwoGrid);
@@ -44,16 +32,20 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 	playerOneGameboardContainer.appendChild(playerOneGameboard);
 	playerTwoGameboardContainer.appendChild(playerTwoGameboard);
 
+	setupGridCallback(playerTwoGrid, takePlayerOneTurn);
+
 	if (isAI) {
-		revealGrid(playerOneGrid);
+		revealGrid(playerOneGrid, game.playerOne.gameboard);
+	} else {
+		setupGridCallback(playerOneGrid, takePlayerTwoTurn);
 	}
+
 	updateActivePlayer();
 
 	function takePlayerOneTurn(row, col) {
-		if (gameState.activePlayer === gameState.playerOne) {
+		if (game.activePlayer === game.playerOne) {
 			try {
-				gameState.takeTurn([row, col]);
-				updateGrid(playerTwoGrid, gameState.playerTwo.gameboard);
+				game.takeTurn([row, col]);
 				endTurn();
 			} catch (error) {
 				console.error(error);
@@ -62,10 +54,9 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 	}
 
 	function takePlayerTwoTurn(row, col) {
-		if (gameState.activePlayer === gameState.playerTwo) {
+		if (game.activePlayer === game.playerTwo) {
 			try {
-				gameState.takeTurn([row, col]);
-				updateGrid(playerOneGrid, gameState.playerOne.gameboard);
+				game.takeTurn([row, col]);
 				endTurn();
 			} catch (error) {
 				console.error(error);
@@ -76,16 +67,18 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 	async function takeAITurn() {
 		await new Promise((resolve) =>
 			setTimeout(() => {
-				gameState.takeAITurn();
+				game.takeAITurn();
 				resolve();
 			}, 400)
 		);
-		updateGrid(playerOneGrid, gameState.playerOne.gameboard);
 		endTurn();
 	}
 
 	function endTurn() {
-		if (gameState.isGameOver) {
+		updateGrid(playerOneGrid, game.playerOne.gameboard);
+		updateGrid(playerTwoGrid, game.playerTwo.gameboard);
+
+		if (game.isGameOver) {
 			gameOver();
 		} else {
 			updateActivePlayer();
@@ -93,7 +86,7 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 	}
 
 	function updateActivePlayer() {
-		if (gameState.activePlayer === gameState.playerOne) {
+		if (game.activePlayer === game.playerOne) {
 			playerOneGrid.classList.remove('active');
 			playerTwoGrid.classList.add('active');
 		} else {
@@ -109,12 +102,12 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 		playerOneGrid.classList.remove('active');
 		playerTwoGrid.classList.remove('active');
 
-		revealGrid(playerOneGrid);
-		revealGrid(playerTwoGrid);
+		revealGrid(playerOneGrid, game.playerOne.gameboard);
+		revealGrid(playerTwoGrid, game.playerTwo.gameboard);
 
 		const winnerLabel = document.createElement('h2');
 		winnerLabel.classList.add('winner-label');
-		winnerLabel.textContent = `${gameState.activePlayer.name} wins!`;
+		winnerLabel.textContent = `${game.activePlayer.name} wins!`;
 		gameDisplay.appendChild(winnerLabel);
 
 		const newGameButton = document.createElement('button');
@@ -126,6 +119,35 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 			gameDisplay.remove();
 			onGameOverCalback();
 		});
+	}
+}
+
+function makePlayerSide() {
+	const playerSide = document.createElement('div');
+	playerSide.classList.add('player-side');
+	return playerSide;
+}
+
+function makeNameLabel(name) {
+	const label = document.createElement('h3');
+	label.classList.add('player-name');
+	label.textContent = name;
+	return label;
+}
+
+function makeGameboardContainer() {
+	const container = document.createElement('div');
+	container.classList.add('gameboard-container');
+	return container;
+}
+
+function setupGridCallback(gameboardGrid, callback) {
+	const cells = gameboardGrid.childNodes;
+	for (let row = 0; row < 10; ++row) {
+		for (let col = 0; col < 10; ++col) {
+			const UIcell = cells[row * 10 + col];
+			UIcell.addEventListener('click', () => callback(row, col));
+		}
 	}
 }
 
@@ -148,6 +170,13 @@ function updateGrid(grid, gameboard) {
 	}
 }
 
-function revealGrid(grid) {
-	grid.classList.add('revealed');
+function revealGrid(grid, gameboard) {
+	const cells = grid.childNodes;
+	for (let row = 0; row < 10; ++row) {
+		for (let col = 0; col < 10; ++col) {
+			if (gameboard.getCell([row, col]).ship != null) {
+				cells[row * 10 + col].classList.add('revealed');
+			}
+		}
+	}
 }

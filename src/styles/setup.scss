@@ -1,35 +1,67 @@
 @import './variables';
 
 .setup-display {
-	display: flex;
-	flex-direction: column;
-	gap: 32px;
-	align-items: center;
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 42px;
+	justify-items: center;
 	font-size: 2rem;
 
-	input {
-		border: none;
-		border-bottom: 2px solid $color-dark;
-		width: 12ch;
-		font-size: 2rem;
-		&:focus {
-			outline: none;
+	label {
+		grid-row: 1;
+
+		input {
+			border: none;
+			border-bottom: 2px solid $color-dark;
+			width: 12ch;
+			font-size: 2rem;
+			&:focus {
+				outline: none;
+			}
 		}
 	}
 
-	button {
-		border: none;
-		border-radius: 12px;
-		background-color: $color-main;
-		width: 256px;
-		height: 64px;
-		font-size: 1.5rem;
-		transition: color 0.2s ease-in-out, background-color 0.3s ease-in-out;
+	.buttons-container {
+		grid-row: 3;
+		display: flex;
+		gap: 64px;
 
-		&:hover {
-			cursor: pointer;
-			background-color: $color-dark;
-			color: $color-white;
+		button {
+			border: none;
+			border-radius: 12px;
+			background-color: $color-main;
+			width: 256px;
+			height: 64px;
+			font-size: 1.5rem;
+			transition: color 0.2s ease-in-out, background-color 0.3s ease-in-out;
+	
+			&:hover {
+				cursor: pointer;
+				background-color: $color-dark;
+				color: $color-white;
+			}
+		}
+	}
+
+	.gameboard-setup {
+		grid-row: 2;
+		display: grid;
+		grid-template-columns: 3fr 2fr;
+		gap: 64px;
+
+		.gameboard-container {
+			grid-column: 1;
+			width: calc($cell-size * 11);
+			height: calc($cell-size * 11);
+		}
+
+		.ships-container {
+			justify-self: center;
+			align-self: center;
+			grid-column: 2;
+			width: 300px;
+			height: 500px;
+			border: 2px dotted $color-black;
 		}
 	}
 }

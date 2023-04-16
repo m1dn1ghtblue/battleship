@@ -27,7 +27,7 @@ function makeGameboard(grid) {
 	return gameboard;
 }
 
-function makeGameboardGrid(playerGameboard, onclickCallback) {
+function makeGameboardGrid() {
 	const grid = document.createElement('div');
 	grid.classList.add('gameboard-grid');
 
@@ -35,15 +35,8 @@ function makeGameboardGrid(playerGameboard, onclickCallback) {
 		for (let col = 0; col < 10; ++col) {
 			const cell = document.createElement('div');
 			cell.classList.add('gameboard-grid-cell');
-			if (playerGameboard.getCell([row, col]).ship != null) {
-				cell.classList.add('ship');
-			}
 			cell.style.gridRow = row + 1;
 			cell.style.gridColumn = col + 1;
-
-			cell.addEventListener('click', () => {
-				onclickCallback(row, col);
-			});
 
 			grid.appendChild(cell);
 		}
