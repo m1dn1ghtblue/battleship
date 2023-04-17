@@ -1,6 +1,69 @@
 import '../styles/gameboardUI.scss';
+import '../styles/gameboardEditor.scss';
 
-function makeGameboard(grid) {
+export default function GameboardUI(gameboard) {
+	const grid = makeGameboardGrid();
+	const gameboardUI = makeGameboardUI();
+	const cells = grid.childNodes;
+	gameboardUI.appendChild(grid);
+
+	function setupGridOnclickCallback(callback) {
+		for (let row = 0; row < 10; ++row) {
+			for (let col = 0; col < 10; ++col) {
+				cells[row * 10 + col].addEventListener('click', () => callback(row, col));
+			}
+		}
+	}
+
+	function revealGrid() {
+		for (let row = 0; row < 10; ++row) {
+			for (let col = 0; col < 10; ++col) {
+				if (gameboard.getCell([row, col]).ship != null) {
+					cells[row * 10 + col].classList.add('revealed');
+				}
+			}
+		}
+	}
+
+	function updateGrid() {
+		for (let row = 0; row < 10; ++row) {
+			for (let col = 0; col < 10; ++col) {
+				const UIcell = cells[row * 10 + col];
+				const gameCell = gameboard.getCell([row, col]);
+				if (gameCell.isHit) {
+					UIcell.classList.add('hit');
+					if (gameCell.ship != null) {
+						UIcell.classList.add('damaged');
+						if (!gameCell.ship.isAlive) {
+							UIcell.classList.add('destroyed');
+						}
+					}
+				}
+			}
+		}
+	}
+
+	function setActive(state) {
+		if (state == true) {
+			grid.classList.add('active');
+		} else {
+			grid.classList.remove('active');
+		}
+	}
+
+	return {
+		get DOMObject() {
+			return gameboardUI;
+		},
+
+		setupGridOnclickCallback,
+		revealGrid,
+		updateGrid,
+		setActive,
+	};
+}
+
+function makeGameboardUI() {
 	const gameboard = document.createElement('div');
 	gameboard.classList.add('gameboard');
 
@@ -21,8 +84,6 @@ function makeGameboard(grid) {
 		markupElement.style.gridRow = `${row + 2}`;
 		gameboard.appendChild(markupElement);
 	}
-
-	gameboard.appendChild(grid);
 
 	return gameboard;
 }
@@ -45,4 +106,4 @@ function makeGameboardGrid() {
 	return grid;
 }
 
-export { makeGameboard, makeGameboardGrid };
+export { makeGameboardGrid, makeGameboardUI };

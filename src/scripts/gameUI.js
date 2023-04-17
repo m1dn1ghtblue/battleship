@@ -1,43 +1,30 @@
 'use strict';
 
 import '../styles/gameUI.scss';
-import { makeGameboard, makeGameboardGrid } from './gameboardUI.js';
+import GameboardUI from './gameboardUI.js';
 
 export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
-	const gameDisplay = document.createElement('div');
-	gameDisplay.classList.add('game');
-	gameContainer.appendChild(gameDisplay);
+	const display = new Display();
+	gameContainer.appendChild(display.DOMObject);
 
-	const playerOneSide = makePlayerSide();
-	gameDisplay.appendChild(playerOneSide);
+	display.setPlayerOneName(game.playerOne.name);
+	display.setPlayerTwoName(game.playerTwo.name);
 
-	const playerTwoSide = makePlayerSide();
-	gameDisplay.appendChild(playerTwoSide);
+	const playerOneGameboardUI = new GameboardUI(game.playerOne.gameboard);
+	const playerTwoGameboardUI = new GameboardUI(game.playerTwo.gameboard);
 
-	playerOneSide.appendChild(makeNameLabel(game.playerOne.name));
-	playerTwoSide.appendChild(makeNameLabel(game.playerTwo.name));
+	display.playerOneGameboardContainer.appendChild(playerOneGameboardUI.DOMObject);
+	display.playerTwoGameboardContainer.appendChild(playerTwoGameboardUI.DOMObject);
 
-	const playerOneGameboardContainer = makeGameboardContainer();
-	playerOneSide.appendChild(playerOneGameboardContainer);
+	playerTwoGameboardUI.setupGridOnclickCallback(takePlayerOneTurn);
 
-	const playerTwoGameboardContainer = makeGameboardContainer();
-	playerTwoSide.appendChild(playerTwoGameboardContainer);
-
-	const playerOneGrid = makeGameboardGrid();
-	const playerTwoGrid = makeGameboardGrid();
-
-	const playerOneGameboard = makeGameboard(playerOneGrid);
-	const playerTwoGameboard = makeGameboard(playerTwoGrid);
-
-	playerOneGameboardContainer.appendChild(playerOneGameboard);
-	playerTwoGameboardContainer.appendChild(playerTwoGameboard);
-
-	setupGridCallback(playerTwoGrid, takePlayerOneTurn);
+	playerOneGameboardUI.revealGrid();
+	playerTwoGameboardUI.revealGrid();
 
 	if (isAI) {
-		revealGrid(playerOneGrid, game.playerOne.gameboard);
+		playerOneGameboardUI.revealGrid();
 	} else {
-		setupGridCallback(playerOneGrid, takePlayerTwoTurn);
+		playerOneGameboardUI.setupGridOnclickCallback(takePlayerTwoTurn);
 	}
 
 	updateActivePlayer();
@@ -75,51 +62,103 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 	}
 
 	function endTurn() {
-		updateGrid(playerOneGrid, game.playerOne.gameboard);
-		updateGrid(playerTwoGrid, game.playerTwo.gameboard);
+		playerOneGameboardUI.updateGrid();
+		playerTwoGameboardUI.updateGrid();
 
 		if (game.isGameOver) {
 			gameOver();
 		} else {
 			updateActivePlayer();
-		}
-	}
-
-	function updateActivePlayer() {
-		if (game.activePlayer === game.playerOne) {
-			playerOneGrid.classList.remove('active');
-			playerTwoGrid.classList.add('active');
-		} else {
-			playerOneGrid.classList.add('active');
-			playerTwoGrid.classList.remove('active');
-			if (isAI) {
+			if (isAI && game.activePlayer === game.playerTwo) {
 				takeAITurn();
 			}
 		}
 	}
 
+	function updateActivePlayer() {
+		playerOneGameboardUI.setActive(game.activePlayer !== game.playerOne);
+		playerTwoGameboardUI.setActive(game.activePlayer === game.playerOne);
+	}
+
 	function gameOver() {
-		playerOneGrid.classList.remove('active');
-		playerTwoGrid.classList.remove('active');
+		playerOneGameboardUI.setActive(false);
+		playerTwoGameboardUI.setActive(false);
 
-		revealGrid(playerOneGrid, game.playerOne.gameboard);
-		revealGrid(playerTwoGrid, game.playerTwo.gameboard);
+		playerOneGameboardUI.revealGrid();
+		playerTwoGameboardUI.revealGrid();
 
-		const winnerLabel = document.createElement('h2');
-		winnerLabel.classList.add('winner-label');
-		winnerLabel.textContent = `${game.activePlayer.name} wins!`;
-		gameDisplay.appendChild(winnerLabel);
+		display.showWinner(game.activePlayer.name);
 
 		const newGameButton = document.createElement('button');
 		newGameButton.classList.add('new-game-btn');
 		newGameButton.textContent = 'New game';
-		gameDisplay.appendChild(newGameButton);
-
 		newGameButton.addEventListener('click', () => {
-			gameDisplay.remove();
+			display.remove();
 			onGameOverCalback();
 		});
+
+		display.addButton(newGameButton);
 	}
+}
+
+function Display() {
+	const gameDisplay = document.createElement('div');
+	gameDisplay.classList.add('game');
+
+	const playerOneSide = makePlayerSide();
+	gameDisplay.appendChild(playerOneSide);
+
+	const playerTwoSide = makePlayerSide();
+	gameDisplay.appendChild(playerTwoSide);
+
+	const playerOneNameLabel = makeNameLabel();
+	playerOneSide.appendChild(playerOneNameLabel);
+	const playerTwoNameLabel = makeNameLabel();
+	playerTwoSide.appendChild(playerTwoNameLabel);
+
+	const _playerOneGameboardContainer = makeGameboardContainer();
+	playerOneSide.appendChild(_playerOneGameboardContainer);
+
+	const _playerTwoGameboardContainer = makeGameboardContainer();
+	playerTwoSide.appendChild(_playerTwoGameboardContainer);
+
+	function showWinner(winnerName) {
+		const winnerLabel = document.createElement('h2');
+		winnerLabel.classList.add('winner-label');
+		winnerLabel.textContent = `${winnerName} wins!`;
+		gameDisplay.appendChild(winnerLabel);
+	}
+
+	function addButton(button) {
+		gameDisplay.appendChild(button);
+	}
+
+	function remove() {
+		gameDisplay.remove();
+	}
+
+	return {
+		get DOMObject() {
+			return gameDisplay;
+		},
+		get playerOneGameboardContainer() {
+			return _playerOneGameboardContainer;
+		},
+		get playerTwoGameboardContainer() {
+			return _playerTwoGameboardContainer;
+		},
+
+		setPlayerOneName: function (name) {
+			playerOneNameLabel.textContent = name;
+		},
+		setPlayerTwoName: function (name) {
+			playerTwoNameLabel.textContent = name;
+		},
+
+		showWinner,
+		addButton,
+		remove,
+	};
 }
 
 function makePlayerSide() {
@@ -128,10 +167,9 @@ function makePlayerSide() {
 	return playerSide;
 }
 
-function makeNameLabel(name) {
+function makeNameLabel() {
 	const label = document.createElement('h3');
 	label.classList.add('player-name');
-	label.textContent = name;
 	return label;
 }
 
@@ -139,44 +177,4 @@ function makeGameboardContainer() {
 	const container = document.createElement('div');
 	container.classList.add('gameboard-container');
 	return container;
-}
-
-function setupGridCallback(gameboardGrid, callback) {
-	const cells = gameboardGrid.childNodes;
-	for (let row = 0; row < 10; ++row) {
-		for (let col = 0; col < 10; ++col) {
-			const UIcell = cells[row * 10 + col];
-			UIcell.addEventListener('click', () => callback(row, col));
-		}
-	}
-}
-
-function updateGrid(grid, gameboard) {
-	const cells = grid.childNodes;
-	for (let row = 0; row < 10; ++row) {
-		for (let col = 0; col < 10; ++col) {
-			const UIcell = cells[row * 10 + col];
-			const gameCell = gameboard.getCell([row, col]);
-			if (gameCell.isHit) {
-				UIcell.classList.add('hit');
-				if (gameCell.ship != null) {
-					UIcell.classList.add('damaged');
-					if (!gameCell.ship.isAlive) {
-						UIcell.classList.add('destroyed');
-					}
-				}
-			}
-		}
-	}
-}
-
-function revealGrid(grid, gameboard) {
-	const cells = grid.childNodes;
-	for (let row = 0; row < 10; ++row) {
-		for (let col = 0; col < 10; ++col) {
-			if (gameboard.getCell([row, col]).ship != null) {
-				cells[row * 10 + col].classList.add('revealed');
-			}
-		}
-	}
 }

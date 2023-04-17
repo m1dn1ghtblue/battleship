@@ -1,0 +1,22 @@
+@import './variables';
+@import './gameboardUI';
+
+.gameboard-setup {
+	grid-row: 2;
+	display: grid;
+	grid-template-columns: 3fr 2fr;
+	gap: 64px;
+
+	.gameboard-container {
+		grid-column: 1;
+		width: calc($cell-size * 11);
+		height: calc($cell-size * 11);
+	}
+
+	.ships-container {
+		grid-column: 2;
+		width: 300px;
+		height: 500px;
+		border: 2px dotted $color-black;
+	}
+}

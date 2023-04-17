@@ -3,10 +3,7 @@ import '../styles/gameboardUI.scss';
 
 import Game from './game/game';
 import Player from './game/player';
-import { makeGameboard, makeGameboardGrid } from './gameboardUI.js';
-import playGame from './gameUI';
-
-const shipSizes = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+import GameboardEditor from './gameboardEditor.js';
 
 export default function setup(setupContainer, onSetupCallback) {
 	let playerOne = null,
@@ -17,58 +14,62 @@ export default function setup(setupContainer, onSetupCallback) {
 
 	function setupPlayerOne() {
 		const defaultName = 'Player 1';
-		const display = makeDisplay();
-		setupContainer.appendChild(display);
+		const display = new Display();
+		setupContainer.appendChild(display.DOMObject);
 
-		const input = document.getElementById('name-input');
-		input.setAttribute('placeholder', defaultName);
+		display.nameInput.setAttribute('placeholder', defaultName);
 
 		const nextPlayerBtn = makeButton('Next player', () => {
-			const name = input.value;
-			playerOne = new Player(name ? name : defaultName);
-			randomPlacement(playerOne);
+			const name = display.nameInput.value ? display.nameInput.value : defaultName;
+			playerOne = new Player(name);
+			//display.editor.setGameboard(playerOne.gameboard);
+			randomPlacement(playerOne.gameboard);
+
 			display.remove();
-			isAI = false;
 
 			setupPlayerTwo();
 		});
 
-		document.querySelector('.buttons-container').appendChild(nextPlayerBtn);
+		display.addButton(nextPlayerBtn);
 
 		const playWithAIBtn = makeButton('Play with AI', () => {
-			const name = input.value;
-			playerOne = new Player(name ? name : defaultName);
-			randomPlacement(playerOne);
+			const name = display.nameInput.value ? display.nameInput.value : defaultName;
+			playerOne = new Player(name);
+			//display.editor.setGameboard(playerOne.gameboard);
+			randomPlacement(playerOne.gameboard);
 
 			playerTwo = new Player('AI');
-			randomPlacement(playerTwo);
+			randomPlacement(playerTwo.gameboard);
+
 			display.remove();
 			isAI = true;
 
 			finishSetup();
 		});
 
-		document.querySelector('.buttons-container').appendChild(playWithAIBtn);
+		display.addButton(playWithAIBtn);
 	}
 
 	function setupPlayerTwo() {
 		const defaultName = 'Player 2';
-		const display = makeDisplay();
-		setupContainer.appendChild(display);
+		const display = new Display();
+		setupContainer.appendChild(display.DOMObject);
 
-		const input = document.getElementById('name-input');
-		input.setAttribute('placeholder', defaultName);
+		display.nameInput.setAttribute('placeholder', defaultName);
 
 		const playBtn = makeButton('Play', () => {
-			const name = input.value;
-			playerTwo = new Player(name ? name : defaultName);
-			randomPlacement(playerTwo);
+			const name = display.nameInput.value ? display.nameInput.value : defaultName;
+			playerTwo = new Player(name);
+			//display.editor.setGameboard(playerTwo.gameboard);
+			randomPlacement(playerTwo.gameboard);
+
 			display.remove();
+			isAI = false;
 
 			finishSetup();
 		});
 
-		document.querySelector('.buttons-container').appendChild(playBtn);
+		display.addButton(playBtn);
 	}
 
 	function finishSetup() {
@@ -77,7 +78,7 @@ export default function setup(setupContainer, onSetupCallback) {
 	}
 }
 
-function makeDisplay() {
+function Display() {
 	const display = document.createElement('div');
 	display.classList.add('setup-display');
 
@@ -89,32 +90,45 @@ function makeDisplay() {
 	gameboardContainer.classList.add('gameboard-container');
 	gameboardSetupContainer.appendChild(gameboardContainer);
 
-	const grid = makeGameboardGrid();
-	const gameboard = makeGameboard(grid);
-	gameboardContainer.appendChild(gameboard);
-
-	gameboardSetupContainer.appendChild(makeShipsContainer());
+	const gameboardEditor = new GameboardEditor();
+	gameboardContainer.appendChild(gameboardEditor.DOMObject);
 
 	const buttonsContainer = document.createElement('div');
 	buttonsContainer.classList.add('buttons-container');
 	display.appendChild(buttonsContainer);
 
-	display.appendChild(makeLabel());
+	const input = makeInput();
+	const label = makeLabel();
+	label.appendChild(input);
+	display.appendChild(label);
 
-	return display;
-}
+	function addButton(button) {
+		buttonsContainer.appendChild(button);
+	}
 
-function makeShipsContainer() {
-	const shipsContainer = document.createElement('div');
-	shipsContainer.classList.add('ships-container');
+	function remove() {
+		display.remove();
+	}
 
-	return shipsContainer;
+	return {
+		get DOMObject() {
+			return display;
+		},
+		get editor() {
+			return gameboardEditor;
+		},
+		get nameInput() {
+			return input;
+		},
+
+		addButton,
+		remove,
+	};
 }
 
 function makeLabel() {
 	const label = document.createElement('label');
 	label.textContent = 'Player name: ';
-	label.appendChild(makeInput());
 	return label;
 }
 
@@ -133,12 +147,16 @@ function makeButton(text, callback) {
 	return button;
 }
 
-function randomPlacement(player) {
-	const shipsToPlace = shipSizes.slice();
+function randomPlacement(gameboard) {
+	function getRandomInt(max) {
+		return Math.floor(Math.random() * max);
+	}
+
+	const shipsToPlace = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
 	while (shipsToPlace.length > 0) {
 		try {
-			player.gameboard.placeShip(
+			gameboard.placeShip(
 				[getRandomInt(10), getRandomInt(10)],
 				shipsToPlace[0],
 				getRandomInt(2) ? 'horizontal' : 'vertical'
@@ -146,8 +164,4 @@ function randomPlacement(player) {
 			shipsToPlace.shift();
 		} catch (e) {}
 	}
-}
-
-function getRandomInt(max) {
-	return Math.floor(Math.random() * max);
 }
