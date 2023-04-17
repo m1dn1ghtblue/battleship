@@ -22,11 +22,10 @@ export default function setup(setupContainer, onSetupCallback) {
 		const nextPlayerBtn = makeButton('Next player', () => {
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerOne = new Player(name);
-			//display.editor.setGameboard(playerOne.gameboard);
-			randomPlacement(playerOne.gameboard);
+			display.editor.placeRandom();
+			display.editor.setGameboard(playerOne.gameboard);
 
 			display.remove();
-
 			setupPlayerTwo();
 		});
 
@@ -35,8 +34,8 @@ export default function setup(setupContainer, onSetupCallback) {
 		const playWithAIBtn = makeButton('Play with AI', () => {
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerOne = new Player(name);
-			//display.editor.setGameboard(playerOne.gameboard);
-			randomPlacement(playerOne.gameboard);
+			display.editor.placeRandom();
+			display.editor.setGameboard(playerOne.gameboard);
 
 			playerTwo = new Player('AI');
 			randomPlacement(playerTwo.gameboard);
@@ -60,8 +59,8 @@ export default function setup(setupContainer, onSetupCallback) {
 		const playBtn = makeButton('Play', () => {
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerTwo = new Player(name);
-			//display.editor.setGameboard(playerTwo.gameboard);
-			randomPlacement(playerTwo.gameboard);
+			display.editor.placeRandom();
+			display.editor.setGameboard(playerTwo.gameboard);
 
 			display.remove();
 			isAI = false;

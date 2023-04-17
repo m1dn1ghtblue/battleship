@@ -18,6 +18,7 @@ export default function playGame(game, isAI, gameContainer, onGameOverCalback) {
 
 	playerTwoGameboardUI.setupGridOnclickCallback(takePlayerOneTurn);
 
+	// For development; TODO delete grid reveal
 	playerOneGameboardUI.revealGrid();
 	playerTwoGameboardUI.revealGrid();
 

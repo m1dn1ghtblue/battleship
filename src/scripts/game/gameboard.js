@@ -7,8 +7,8 @@ export default function Gameboard() {
 	let shipsAlive = 0;
 
 	function placeShip(coords, size, orientation) {
-		_validateCoordinates(coords);
-		_validateOrientation(orientation);
+		validateCoordinates(coords);
+		validateOrientation(orientation);
 
 		const cells = _getShipCells(coords, size, orientation);
 		_validateShipCells(cells);
@@ -23,7 +23,7 @@ export default function Gameboard() {
 	}
 
 	function getCell(coords) {
-		_validateCoordinates(coords);
+		validateCoordinates(coords);
 
 		return {
 			get ship() {
@@ -37,7 +37,7 @@ export default function Gameboard() {
 	}
 
 	function receiveAttack(coords) {
-		_validateCoordinates(coords);
+		validateCoordinates(coords);
 		let [row, col] = coords;
 
 		if (grid[row][col].isHit) {
@@ -114,32 +114,6 @@ export default function Gameboard() {
 		return cells;
 	}
 
-	function _validateOrientation(orientation) {
-		if (orientation != 'horizontal' && orientation != 'vertical') {
-			throw Error(
-				`Invalid ship orientation: ${orientation}. Orientation must be string 'horizontal' or 'vertical'`
-			);
-		}
-	}
-
-	function _validateCoordinates(coords) {
-		if (
-			!coords ||
-			!(coords instanceof Array) ||
-			coords.length != 2 ||
-			!Number.isInteger(coords[0]) ||
-			!Number.isInteger(coords[1])
-		) {
-			throw Error('Grid coordinates must be passed as array containing two integer elements');
-		}
-
-		if (coords[0] < 0 || coords[1] < 0 || coords[0] > MAX_COORDINATE || coords[1] > MAX_COORDINATE) {
-			throw Error(
-				`Invalid grid coordinates: ${coords}. Coordinates must be non-negative integer not greater than ${MAX_COORDINATE}`
-			);
-		}
-	}
-
 	function _validateShipCells(cells) {
 		for (let coords of cells) {
 			if (!_checkSurrounding(coords)) {
@@ -169,4 +143,28 @@ export default function Gameboard() {
 		getCell,
 		receiveAttack,
 	};
+}
+
+function validateOrientation(orientation) {
+	if (orientation != 'horizontal' && orientation != 'vertical') {
+		throw Error(`Invalid ship orientation: ${orientation}. Orientation must be string 'horizontal' or 'vertical'`);
+	}
+}
+
+function validateCoordinates(coords) {
+	if (
+		!coords ||
+		!(coords instanceof Array) ||
+		coords.length != 2 ||
+		!Number.isInteger(coords[0]) ||
+		!Number.isInteger(coords[1])
+	) {
+		throw Error('Grid coordinates must be passed as array containing two integer elements');
+	}
+
+	if (coords[0] < 0 || coords[1] < 0 || coords[0] > MAX_COORDINATE || coords[1] > MAX_COORDINATE) {
+		throw Error(
+			`Invalid grid coordinates: ${coords}. Coordinates must be non-negative integer not greater than ${MAX_COORDINATE}`
+		);
+	}
 }

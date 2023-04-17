@@ -11,6 +11,10 @@
 		grid-column: 1;
 		width: calc($cell-size * 11);
 		height: calc($cell-size * 11);
+		
+		.gameboard .gameboard-grid .gameboard-grid-cell.ship {
+			background-color: $color-dark;
+		}
 	}
 
 	.ships-container {
@@ -19,4 +23,5 @@
 		height: 500px;
 		border: 2px dotted $color-black;
 	}
+	
 }

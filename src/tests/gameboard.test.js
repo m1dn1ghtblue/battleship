@@ -1,5 +1,4 @@
 import Gameboard from '../scripts/game/gameboard.js';
-import Ship from '../scripts/game/ship.js';
 
 describe('Gameboard factory function', () => {
 	test('Function should return object with required properties', () => {
