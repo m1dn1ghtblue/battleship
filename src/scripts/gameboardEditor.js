@@ -4,85 +4,148 @@ import '../styles/gameboardEditor.scss';
 const shipSizes = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
 export default function GameboardEditor() {
+	document.body.setAttribute('draggable', 'false');
+	const editor = document.createElement('div');
+	editor.classList.add('gameboard-editor');
+
+	const gameboardContainer = document.createElement('div');
+	gameboardContainer.classList.add('gameboard-container');
+	editor.appendChild(gameboardContainer);
+
 	const grid = makeGameboardGrid();
 	const gameboardUI = makeGameboardUI();
 	gameboardUI.appendChild(grid);
+	gameboardContainer.appendChild(gameboardUI);
+	const gridCells = grid.childNodes;
 
-	const placedShips = [];
+	const shipsContainer = document.createElement('div');
+	shipsContainer.classList.add('ships-container');
+	editor.appendChild(shipsContainer);
 
-	function setGameboard(gameboard) {
-		//TODO add validation that all ships are placed
+	shipsContainer.addEventListener('dragover', (e) => {
+		e.preventDefault();
+	});
 
-		for (let shipPosition of placedShips) {
-			gameboard.placeShip(
-				shipPosition.coords,
-				shipPosition.size,
-				shipPosition.isVertical ? 'vertical' : 'horizontal'
-			);
-		}
+	shipsContainer.addEventListener('drop', (e) => {
+		const placeable = placeables.get(e.dataTransfer.getData('text/plain'));
+		placeable.deleteCoords();
+		placeable.drop();
+		shipsContainer.appendChild(placeable.DOMObject);
+		placeable.removeOnCLickCallback();
+	});
+
+	const placeables = new Map();
+
+	for (let size of shipSizes) {
+		const placeable = new ShipPlaceable(size);
+		placeables.set(placeable.id, placeable);
+
+		shipsContainer.appendChild(placeable.DOMObject);
 	}
 
-	function placeShip(shipPosition) {
-		if (_canPlaceShip(shipPosition)) {
-			placedShips.push(shipPosition);
-			_toggleShip(shipPosition.cells, true);
-		} else {
-			throw Error('Cannot place ship with given position', shipPosition);
-		}
-	}
+	_setGridCallback('dragover', (e) => {
+		e.preventDefault();
+	});
 
-	function _toggleShip(shipCells, active) {
-		const gridCells = grid.childNodes;
-		for (let [row, col] of shipCells) {
-			if (active) {
-				gridCells[row * 10 + col].classList.add('ship');
-			} else {
-				gridCells[row * 10 + col].classList.remove('ship');
+	_setGridCallback('dragenter', (e, row, col) => {
+		e.preventDefault();
+		gridCells[row * 10 + col].classList.add('drag-over');
+	});
+
+	_setGridCallback('dragleave', (e, row, col) => {
+		e.preventDefault();
+		gridCells[row * 10 + col].classList.remove('drag-over');
+	});
+
+	_setGridCallback('drop', (e, row, col) => {
+		try {
+			const cell = gridCells[row * 10 + col];
+			cell.classList.remove('drag-over');
+			const placeable = placeables.get(e.dataTransfer.getData('text/plain'));
+			placeable.drop();
+			_placeShip(placeable, row, col);
+			cell.appendChild(placeable.DOMObject);
+		} catch (error) {}
+	});
+
+	function _setGridCallback(event, callback) {
+		for (let row = 0; row < 10; ++row) {
+			for (let col = 0; col < 10; ++col) {
+				gridCells[row * 10 + col].addEventListener(event, (e) => callback(e, row, col));
 			}
 		}
 	}
 
-	function _removeShip(shipPosition) {
-		const index = placedShips.indexOf(shipPosition);
-		placedShips.splice(index, 1);
-		_toggleShip(shipPosition.cells, false);
+	function _placeShip(placeable, row, col) {
+		if (!_checkCoordinates(row, col, placeable)) {
+			throw Error(
+				`Cannot place ${placeable.isVertical ? 'vertical' : 'horizontal'} ship of size ${
+					placeable.size
+				} at coordinates [${row}, ${col}]`
+			);
+		}
+		placeable.setCoords(row, col);
+		placeable.setOnClickCallback(() => {
+			placeable.rotate();
+			if (!_checkCoordinates(row, col, placeable)) {
+				placeable.rotate();
+			}
+		});
 	}
 
-	function _canPlaceShip(shipPosition) {
-		if (placedShips.length == 0) {
-			return true;
+	function _checkCoordinates(row, col, placeable) {
+		if (row < 0 || col < 0 || row > 9 || col > 9) {
+			return false;
 		}
-		for (let otherShipPosition of placedShips) {
-			if (!checkDistance(shipPosition, otherShipPosition)) {
+		if (placeable.isVertical) {
+			const bottom = row + placeable.size - 1;
+			if (bottom > 9) {
+				return false;
+			}
+		} else {
+			const left = col + placeable.size - 1;
+			if (left > 9) {
 				return false;
 			}
 		}
+
+		const thisCells = new ShipPosition([row, col], placeable.size, placeable.isVertical).cells;
+		const occupiedCells = [];
+		for (let [_, other] of placeables) {
+			if (other.isPlaced && other.id != placeable.id) {
+				occupiedCells.push(...new ShipPosition(other.coords, other.size, other.isVertical).cells);
+			}
+		}
+
+		for (let [otherRow, otherCol] of occupiedCells) {
+			for (let [thisRow, thisCol] of thisCells) {
+				if (Math.abs(thisRow - otherRow) < 2 && Math.abs(thisCol - otherCol) < 2) {
+					return false;
+				}
+			}
+		}
+
 		return true;
 	}
 
-	function placeRandom() {
-		const shipsToPlace = shipSizes.slice();
-		while (shipsToPlace.length > 0) {
-			try {
-				const shipPosition = new ShipPosition(
-					[getRandomInt(10), getRandomInt(10)],
-					shipsToPlace[0],
-					getRandomInt(2) % 2 == 0
-				);
+	function setGameboard(gameboard) {
+		for (let [_, placeable] of placeables) {
+			if (!placeable.isPlaced) {
+				throw Error('Cannot set gameboard until all ships are placed');
+			}
+		}
 
-				placeShip(shipPosition);
-				shipsToPlace.shift();
-			} catch (e) {}
+		for (let [_, placeable] of placeables) {
+			gameboard.placeShip(placeable.coords, placeable.size, placeable.isVertical ? 'vertical' : 'horizontal');
 		}
 	}
 
 	return {
 		get DOMObject() {
-			return gameboardUI;
+			return editor;
 		},
 
 		setGameboard,
-		placeRandom,
 	};
 }
 
@@ -90,58 +153,22 @@ function getRandomInt(max) {
 	return Math.floor(Math.random() * max);
 }
 
-function checkDistance(shipPosition1, shipPosition2) {
-	const cells1 = shipPosition1.cells;
-	const cells2 = shipPosition2.cells;
-	for (let [row1, col1] of cells1) {
-		for (let [row2, col2] of cells2) {
-			if (Math.abs(row1 - row2) <= 1 && Math.abs(col1 - col2) <= 1) {
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
 function ShipPosition(coords, size, isVertical) {
-	if (!validatePosition(coords, size, isVertical)) {
-		throw Error(
-			`Cannot place ${isVertical ? 'vertical' : 'horizontal'} ship of size ${size} at coordinates ${coords}`
-		);
-	}
-
-	let _coords = coords;
-	let _isVertical = isVertical;
-
-	function validatePosition(coords, size, isVertical) {
-		if (typeof isVertical != 'boolean') {
-			throw Error('isVertical must be boolean value');
-		}
-
-		const [row, col] = coords;
-		if (row == undefined || col == undefined || row < 0 || col < 0 || row > 9 || col > 9) {
-			throw Error(`Invalid ship coordinates: [${row}, ${col}]`);
-		}
-
-		if (isVertical) {
-			const down = row + size - 1;
-			if (down > 9) {
-				return false;
-			}
-		} else {
-			const left = col + size - 1;
-			if (left > 9) {
-				return false;
-			}
-		}
-
-		return true;
-	}
+	const _coords = coords;
+	const _isVertical = isVertical;
+	const _size = size;
 
 	return {
 		get size() {
-			return size;
+			return _size;
+		},
+
+		get coords() {
+			return _coords;
+		},
+
+		get isVertical() {
+			return _isVertical;
 		},
 
 		get coords() {
@@ -153,36 +180,110 @@ function ShipPosition(coords, size, isVertical) {
 			const [row, col] = _coords;
 
 			if (_isVertical) {
-				for (let i = 0; i < size; ++i) {
+				for (let i = 0; i < _size; ++i) {
 					shipCells.push([row + i, col]);
 				}
 			} else {
-				for (let i = 0; i < size; ++i) {
+				for (let i = 0; i < _size; ++i) {
 					shipCells.push([row, col + i]);
 				}
 			}
 
 			return shipCells;
 		},
+	};
+}
 
-		set coords(newCoords) {
-			if (validatePosition(size, newCoords, _isVertical)) {
-				_coords = newCoords;
-			} else {
-				throw Error(`Cannot set ship coordinates to ${newCoords}`, this);
-			}
+const generateId = idGenerator();
+
+function ShipPlaceable(size) {
+	const _id = generateId();
+	const placeable = document.createElement('div');
+	placeable.classList.add('ship-placeable');
+	placeable.setAttribute('ship-size', size);
+	placeable.setAttribute('draggable', 'true');
+
+	let _isVertical = false;
+	let _coords = null;
+
+	placeable.addEventListener('dragstart', (e) => {
+		e.dataTransfer.setData('text/plain', _id);
+		placeable.classList.add('moving');
+	});
+
+	placeable.addEventListener('dragend', (e) => {
+		drop();
+	});
+
+	function drop() {
+		placeable.classList.remove('moving');
+	}
+
+	let _onClickCallback = null;
+
+	function setOnClickCallback(callback) {
+		removeOnCLickCallback();
+		_onClickCallback = callback;
+		placeable.addEventListener('click', _onClickCallback);
+	}
+
+	function removeOnCLickCallback() {
+		placeable.removeEventListener('click', _onClickCallback);
+		_onClickCallback = null;
+	}
+
+	function rotate() {
+		_isVertical = !_isVertical;
+		placeable.classList.toggle('vertical');
+	}
+
+	function setCoords(row, col) {
+		_coords = [row, col];
+		placeable.classList.add('placed');
+	}
+
+	function deleteCoords() {
+		_coords = null;
+		placeable.classList.remove('placed');
+	}
+
+	return {
+		get id() {
+			return _id;
+		},
+
+		get DOMObject() {
+			return placeable;
+		},
+
+		get size() {
+			return size;
+		},
+
+		get coords() {
+			return _coords;
 		},
 
 		get isVertical() {
 			return _isVertical;
 		},
 
-		set isVertical(newIsVertical) {
-			if (validatePosition(size, _coords, newIsVertical)) {
-				_isVertical = newIsVertical;
-			} else {
-				throw Error(`Cannot set ship orientation to ${newIsVertical ? 'vertical' : 'horizontal'}`, this);
-			}
+		get isPlaced() {
+			return _coords != null;
 		},
+
+		setCoords,
+		deleteCoords,
+		drop,
+		rotate,
+		setOnClickCallback,
+		removeOnCLickCallback,
+	};
+}
+
+function idGenerator() {
+	let nextId = 0;
+	return function () {
+		return `id_${nextId++}`;
 	};
 }

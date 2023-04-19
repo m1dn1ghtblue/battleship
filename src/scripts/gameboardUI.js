@@ -98,7 +98,6 @@ function makeGameboardGrid() {
 			cell.classList.add('gameboard-grid-cell');
 			cell.style.gridRow = row + 1;
 			cell.style.gridColumn = col + 1;
-
 			grid.appendChild(cell);
 		}
 	}

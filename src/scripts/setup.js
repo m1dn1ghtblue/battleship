@@ -22,7 +22,7 @@ export default function setup(setupContainer, onSetupCallback) {
 		const nextPlayerBtn = makeButton('Next player', () => {
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerOne = new Player(name);
-			display.editor.placeRandom();
+			//display.editor.placeRandom();
 			display.editor.setGameboard(playerOne.gameboard);
 
 			display.remove();
@@ -34,7 +34,7 @@ export default function setup(setupContainer, onSetupCallback) {
 		const playWithAIBtn = makeButton('Play with AI', () => {
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerOne = new Player(name);
-			display.editor.placeRandom();
+			//display.editor.placeRandom();
 			display.editor.setGameboard(playerOne.gameboard);
 
 			playerTwo = new Player('AI');
@@ -59,7 +59,7 @@ export default function setup(setupContainer, onSetupCallback) {
 		const playBtn = makeButton('Play', () => {
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerTwo = new Player(name);
-			display.editor.placeRandom();
+			//display.editor.placeRandom();
 			display.editor.setGameboard(playerTwo.gameboard);
 
 			display.remove();
@@ -81,16 +81,12 @@ function Display() {
 	const display = document.createElement('div');
 	display.classList.add('setup-display');
 
-	const gameboardSetupContainer = document.createElement('div');
-	gameboardSetupContainer.classList.add('gameboard-setup');
-	display.appendChild(gameboardSetupContainer);
-
-	const gameboardContainer = document.createElement('div');
-	gameboardContainer.classList.add('gameboard-container');
-	gameboardSetupContainer.appendChild(gameboardContainer);
+	const editorContainer = document.createElement('div');
+	editorContainer.classList.add('editor-container');
+	display.appendChild(editorContainer);
 
 	const gameboardEditor = new GameboardEditor();
-	gameboardContainer.appendChild(gameboardEditor.DOMObject);
+	editorContainer.appendChild(gameboardEditor.DOMObject);
 
 	const buttonsContainer = document.createElement('div');
 	buttonsContainer.classList.add('buttons-container');

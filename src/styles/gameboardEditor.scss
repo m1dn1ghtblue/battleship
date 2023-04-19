@@ -1,7 +1,7 @@
 @import './variables';
 @import './gameboardUI';
 
-.gameboard-setup {
+.gameboard-editor {
 	grid-row: 2;
 	display: grid;
 	grid-template-columns: 3fr 2fr;
@@ -9,19 +9,68 @@
 
 	.gameboard-container {
 		grid-column: 1;
-		width: calc($cell-size * 11);
-		height: calc($cell-size * 11);
+		min-width: calc($cell-size * 11);
+		min-height: calc($cell-size * 11);
 		
-		.gameboard .gameboard-grid .gameboard-grid-cell.ship {
-			background-color: $color-dark;
+		.gameboard .gameboard-grid .gameboard-grid-cell {
+			position: relative;
+
+			&.ship {
+				background-color: $color-dark;
+			}
+
+			&.drag-over {
+				background-color: $color-main;
+			}
+
+			.ship-placeable {
+				z-index: 1;
+				margin: 0;
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
 		}
 	}
 
 	.ships-container {
 		grid-column: 2;
+		height: 100%;
 		width: 300px;
-		height: 500px;
-		border: 2px dotted $color-black;
 	}
 	
+	.ship-placeable {
+		margin: 12px;
+		display: inline-block;
+		height: $cell-size;
+		background-color: $color-dark;
+		transform-origin: calc($cell-size / 2) calc($cell-size / 2);
+		cursor: move;
+
+		&.moving, &.placed {
+			&.vertical {
+				transform: rotate(90deg);
+			}
+		}
+
+		&.moving {
+			display: none;
+			cursor: grabbing;
+		}
+
+		&[ship-size='1'] {
+			width: $cell-size;
+		}
+		&[ship-size='2'] {
+			width: calc($cell-size * 2);
+		}
+		&[ship-size='3'] {
+			width: calc($cell-size * 3);
+		}
+		&[ship-size='4'] {
+			width: calc($cell-size * 4);
+		}
+		
+	}
 }
+

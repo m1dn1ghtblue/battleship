@@ -15,10 +15,17 @@
 			border-bottom: 2px solid $color-dark;
 			width: 12ch;
 			font-size: 2rem;
+			text-align: center;
+			
 			&:focus {
 				outline: none;
 			}
 		}
+	}
+
+	.editor-container {
+		min-width: max-content;
+		min-height: max-content;
 	}
 
 	.buttons-container {
