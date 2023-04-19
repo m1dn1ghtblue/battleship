@@ -49,21 +49,22 @@ export default function GameboardEditor() {
 
 	_setGridCallback('dragenter', (e, row, col) => {
 		e.preventDefault();
-		gridCells[row * 10 + col].classList.add('drag-over');
+		const placeable = placeables.get(e.dataTransfer.getData('text/plain'));
+		_showGridHint(row, col, placeable);
 	});
 
 	_setGridCallback('dragleave', (e, row, col) => {
 		e.preventDefault();
-		gridCells[row * 10 + col].classList.remove('drag-over');
 	});
 
 	_setGridCallback('drop', (e, row, col) => {
+		_clearGridHints();
 		try {
 			const cell = gridCells[row * 10 + col];
 			cell.classList.remove('drag-over');
 			const placeable = placeables.get(e.dataTransfer.getData('text/plain'));
 			placeable.drop();
-			_placeShip(placeable, row, col);
+			_placeShip(row, col, placeable);
 			cell.appendChild(placeable.DOMObject);
 		} catch (error) {}
 	});
@@ -76,7 +77,23 @@ export default function GameboardEditor() {
 		}
 	}
 
-	function _placeShip(placeable, row, col) {
+	function _showGridHint(row, col, placeable) {
+		_clearGridHints();
+		const cells = new ShipPosition([row, col], placeable.size, placeable.isVertical).cells;
+		if (_checkCoordinates(row, col, placeable) == true) {
+			for (let [cellRow, cellCol] of cells) {
+				gridCells[cellRow * 10 + cellCol].classList.add('drag-over');
+			}
+		}
+	}
+
+	function _clearGridHints() {
+		for (let gridCell of gridCells) {
+			gridCell.classList.remove('drag-over');
+		}
+	}
+
+	function _placeShip(row, col, placeable) {
 		if (!_checkCoordinates(row, col, placeable)) {
 			throw Error(
 				`Cannot place ${placeable.isVertical ? 'vertical' : 'horizontal'} ship of size ${
