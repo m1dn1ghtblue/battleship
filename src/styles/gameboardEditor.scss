@@ -4,7 +4,7 @@
 .gameboard-editor {
 	grid-row: 2;
 	display: grid;
-	grid-template-columns: 3fr 2fr;
+	grid-template-columns: max-content max-content;
 	gap: 64px;
 
 	.gameboard-container {
@@ -25,7 +25,6 @@
 
 			.ship-placeable {
 				z-index: 1;
-				margin: 0;
 				position: absolute;
 				top: 0;
 				left: 0;
@@ -36,11 +35,25 @@
 	.ships-container {
 		grid-column: 2;
 		height: 100%;
-		width: 300px;
+		width: 360px;
+
+		border: 3px dotted $color-main;
+		padding: 12px;
+
+		.ship-placeable {
+			margin: 12px;
+		}
+
+		&::before {
+			display: block;
+			content: 'Place your ships';
+			text-align: center;
+			color: $color-main;
+			margin-bottom: 32px;
+		}
 	}
 	
 	.ship-placeable {
-		margin: 12px;
 		display: inline-block;
 		height: $cell-size;
 		background-color: $color-dark;
@@ -59,16 +72,16 @@
 		}
 
 		&[ship-size='1'] {
-			width: $cell-size;
+			width: $cell-size - 2px;
 		}
 		&[ship-size='2'] {
-			width: calc($cell-size * 2);
+			width: calc($cell-size * 2 - 2px);
 		}
 		&[ship-size='3'] {
-			width: calc($cell-size * 3);
+			width: calc($cell-size * 3 - 2px);
 		}
 		&[ship-size='4'] {
-			width: calc($cell-size * 4);
+			width: calc($cell-size * 4 - 2px);
 		}
 		
 	}

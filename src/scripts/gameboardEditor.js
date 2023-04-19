@@ -54,10 +54,6 @@ export default function GameboardEditor() {
 		_showGridHint(row, col, placeable);
 	});
 
-	_setGridCallback('dragleave', (e, row, col) => {
-		e.preventDefault();
-	});
-
 	_setGridCallback('drop', (e, row, col) => {
 		_clearGridHints();
 		try {
@@ -145,6 +141,8 @@ export default function GameboardEditor() {
 
 		return true;
 	}
+
+	function isReady() {}
 
 	function setGameboard(gameboard) {
 		for (let [_, placeable] of placeables) {

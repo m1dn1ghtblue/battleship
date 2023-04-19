@@ -38,7 +38,6 @@ export default function setup(setupContainer, onSetupCallback) {
 		const playWithAIBtn = makeButton('Play with AI', () => {
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerOne = new Player(name);
-			display.editor.placeRandom();
 			display.editor.setGameboard(playerOne.gameboard);
 
 			playerTwo = new Player('AI');
