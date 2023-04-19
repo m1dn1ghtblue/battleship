@@ -65,7 +65,6 @@ export default function GameboardEditor() {
 			const placeable = placeables.get(e.dataTransfer.getData('text/plain'));
 			placeable.drop();
 			_placeShip(row, col, placeable);
-			cell.appendChild(placeable.DOMObject);
 		} catch (error) {}
 	});
 
@@ -108,6 +107,7 @@ export default function GameboardEditor() {
 				placeable.rotate();
 			}
 		});
+		gridCells[row * 10 + col].appendChild(placeable.DOMObject);
 	}
 
 	function _checkCoordinates(row, col, placeable) {
@@ -157,12 +157,29 @@ export default function GameboardEditor() {
 		}
 	}
 
+	function placeRandom() {
+		for (let [_, placeable] of placeables) {
+			while (true) {
+				if (getRandomInt(2) % 2) {
+					placeable.rotate();
+				}
+				const row = getRandomInt(10);
+				const col = getRandomInt(10);
+				if (_checkCoordinates(row, col, placeable)) {
+					_placeShip(row, col, placeable);
+					break;
+				}
+			}
+		}
+	}
+
 	return {
 		get DOMObject() {
 			return editor;
 		},
 
 		setGameboard,
+		placeRandom,
 	};
 }
 
