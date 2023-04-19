@@ -142,13 +142,19 @@ export default function GameboardEditor() {
 		return true;
 	}
 
-	function isReady() {}
-
-	function setGameboard(gameboard) {
+	function isReady() {
 		for (let [_, placeable] of placeables) {
 			if (!placeable.isPlaced) {
-				throw Error('Cannot set gameboard until all ships are placed');
+				return false;
 			}
+		}
+
+		return true;
+	}
+
+	function setGameboard(gameboard) {
+		if (!isReady) {
+			throw Error('Cannot set gameboard until all ships are placed');
 		}
 
 		for (let [_, placeable] of placeables) {
@@ -179,6 +185,7 @@ export default function GameboardEditor() {
 
 		setGameboard,
 		placeRandom,
+		isReady,
 	};
 }
 

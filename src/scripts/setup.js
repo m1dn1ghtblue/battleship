@@ -25,6 +25,11 @@ export default function setup(setupContainer, onSetupCallback) {
 		display.addButton(randomPlacementBtn);
 
 		const nextPlayerBtn = makeButton('Next player', () => {
+			if (!display.editor.isReady()) {
+				alert('Please, place your ships on board before the start');
+				return;
+			}
+
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerOne = new Player(name);
 			display.editor.setGameboard(playerOne.gameboard);
@@ -36,6 +41,11 @@ export default function setup(setupContainer, onSetupCallback) {
 		display.addButton(nextPlayerBtn);
 
 		const playWithAIBtn = makeButton('Play with AI', () => {
+			if (!display.editor.isReady()) {
+				alert('Please, place your ships on board before the start');
+				return;
+			}
+
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerOne = new Player(name);
 			display.editor.setGameboard(playerOne.gameboard);
@@ -65,6 +75,11 @@ export default function setup(setupContainer, onSetupCallback) {
 		display.addButton(randomPlacementBtn);
 
 		const playBtn = makeButton('Play', () => {
+			if (!display.editor.isReady()) {
+				alert('Please, place your ships on board before the start');
+				return;
+			}
+
 			const name = display.nameInput.value ? display.nameInput.value : defaultName;
 			playerTwo = new Player(name);
 			display.editor.setGameboard(playerTwo.gameboard);
