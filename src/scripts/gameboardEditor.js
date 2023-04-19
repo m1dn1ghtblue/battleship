@@ -32,6 +32,7 @@ export default function GameboardEditor() {
 		placeable.drop();
 		shipsContainer.appendChild(placeable.DOMObject);
 		placeable.removeOnCLickCallback();
+		_clearGridHints();
 	});
 
 	const placeables = new Map();
